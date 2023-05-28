@@ -114,4 +114,66 @@ class LawAPI
         }
         return $records;
     }
+
+    public static function searchLawLine($params)
+    {
+        $api_params = [];
+        if (array_key_exists('page', $params)) {
+            $api_params['page'] = $page = max(intval($params['page']), 1);
+        } else {
+            $page = 1;
+        }
+        if (array_key_exists('limit', $params)) {
+            $api_params['limit'] = $limit = max(intval($params['limit']), 1);
+        } else {
+            $limit = 300;
+        }
+
+        $cmd = [
+            'query' => [
+                'bool' => [
+                    'must' => [],
+                    'filter' => [],
+                ],
+            ],
+            'sort' => ['順序' => 'asc'],
+            'size' => $limit,
+            'from' => $limit* $page - $limit,
+        ];
+        if ($params['law_id']) {
+            $api_params['law_id'] = $params['law_id'];
+            $cmd['query']['bool']['must'][] = ['term' => ['法律代碼' => $params['law_id']]];
+        }
+        if ($params['ver']) {
+            $api_params['ver'] = $params['ver'];
+            $cmd['query']['bool']['must'][] = ['term' => ['法律版本代碼' => $params['ver']]];
+        }
+        if ($params['lawline_id']) {
+            $api_params['lawline_id'] = $params['lawline_id'];
+            $cmd['query']['bool']['must'][] = ['term' => ['法條代碼' => $params['lawline_id']]];
+        }
+        if ($params['q']) {
+            $api_params['q'] = $params['q'];
+            $cmd['query']['bool']['must'][] = [
+                'match_phrase' => [
+                    '內容' => $params['q'],
+                ]
+            ];
+        }
+
+        $obj = API::query('/lawline/_search', 'GET', json_encode($cmd));
+        $records = new StdClass;
+        $records->query = $cmd['query'];
+        $records->page = $page;
+        $records->total = $obj->hits->total;
+        $records->total_page = ceil($obj->hits->total / 100);
+        $records->api_url = self::getAPIURL('/api/law', $api_params);
+        $records->lawline= [];
+        $meets = array();
+        foreach ($obj->hits->hits as $hit) {
+            $record = $hit->_source;
+            $records->lawline[] = $record;
+        }
+        return $records;
+    }
 }

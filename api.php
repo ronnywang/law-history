@@ -38,49 +38,7 @@ if ($method == 'stat') {
 } else if ($method == 'lawver') {
     json_output(LawAPI::searchLawVer($_GET));
 } else if ($method == 'lawline') {
-    $page = max($_GET['page'], 1);
-    $cmd = [
-        'query' => [
-            'bool' => [
-                'must' => [],
-                'filter' => [],
-            ],
-        ],
-        'sort' => ['順序' => 'asc'],
-        'size' => 100,
-        'from' => 100 * $page - 100,
-    ];
-    if ($_GET['law_id']) {
-        $cmd['query']['bool']['must'][] = ['term' => ['法律代碼' => $_GET['law_id']]];
-    }
-    if ($_GET['ver']) {
-        $cmd['query']['bool']['must'][] = ['term' => ['法律版本代碼' => $_GET['ver']]];
-    }
-    if ($_GET['lawline_id']) {
-        $cmd['query']['bool']['must'][] = ['term' => ['法條代碼' => $_GET['lawline_id']]];
-    }
-    if ($_GET['q']) {
-        $cmd['query']['bool']['must'][] = [
-            'match_phrase' => [
-                '內容' => $_GET['q'],
-            ]
-        ];
-    }
-
-    $obj = API::query('/lawline/_search', 'GET', json_encode($cmd));
-    $records = new StdClass;
-    $records->query = $cmd['query'];
-    $records->page = $page;
-    $records->total = $obj->hits->total;
-    $records->total_page = ceil($obj->hits->total / 100);
-    $records->lawline= [];
-    $meets = array();
-    foreach ($obj->hits->hits as $hit) {
-        $record = $hit->_source;
-        $records->lawline[] = $record;
-    }
-    json_output($records, JSON_UNESCAPED_UNICODE);
-    exit;
+    json_output(LawAPI::searchLawLine($_GET));
 } else {
     readfile(__DIR__ . '/notfound.html');
     exit;
