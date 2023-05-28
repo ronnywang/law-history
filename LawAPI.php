@@ -77,4 +77,41 @@ class LawAPI
         $ret->data = $records;
         return $ret;
     }
+
+    public static function searchLawVer($params)
+    {
+        $api_params = [];
+        if (array_key_exists('page', $params)) {
+            $api_params['page'] = $page = max(intval($params['page']), 1);
+        } else {
+            $page = 1;
+        }
+        if (array_key_exists('limit', $params)) {
+            $api_params['limit'] = $limit = max(intval($params['limit']), 1);
+        } else {
+            $limit = 100;
+        }
+        $cmd = [
+            'sort' => ['日期' => 'asc'],
+            'size' => $limit,
+            'from' => $limit * $page - $limit,
+        ];
+        if ($params['law_id']) {
+            $api_params['law_id'] = $params['law_id'];
+            $cmd['query']['term'] = ['法律代碼' => $params['law_id']];
+        }
+        $obj = API::query('/lawver/_search', 'GET', json_encode($cmd));
+        $records = new StdClass;
+        $records->page = $page;
+        $records->total = $obj->hits->total;
+        $records->total_page = ceil($obj->hits->total / 100);
+        $records->api_url = self::getAPIURL('/api/law', $api_params);
+        $records->lawver= [];
+        $meets = array();
+        foreach ($obj->hits->hits as $hit) {
+            $record = $hit->_source;
+            $records->lawver[] = $record;
+        }
+        return $records;
+    }
 }

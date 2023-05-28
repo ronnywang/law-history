@@ -36,28 +36,7 @@ if ($method == 'stat') {
 } elseif ($method == 'law') {
     json_output(LawAPI::searchLaw($_GET));
 } else if ($method == 'lawver') {
-    $page = max($_GET['page'], 1);
-    $cmd = [
-        'sort' => ['日期' => 'asc'],
-        'size' => 100,
-        'from' => 100 * $page - 100,
-    ];
-    if ($_GET['law_id']) {
-        $cmd['query']['term'] = ['法律代碼' => $_GET['law_id']];
-    }
-    $obj = API::query('/lawver/_search', 'GET', json_encode($cmd));
-    $records = new StdClass;
-    $records->page = $page;
-    $records->total = $obj->hits->total;
-    $records->total_page = ceil($obj->hits->total / 100);
-    $records->lawver= [];
-    $meets = array();
-    foreach ($obj->hits->hits as $hit) {
-        $record = $hit->_source;
-        $records->lawver[] = $record;
-    }
-    json_output($records, JSON_UNESCAPED_UNICODE);
-    exit;
+    json_output(LawAPI::searchLawVer($_GET));
 } else if ($method == 'lawline') {
     $page = max($_GET['page'], 1);
     $cmd = [
