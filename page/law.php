@@ -38,7 +38,7 @@ $law_lines = LawAPI::searchLawLine(['law_id' => $law_id, 'ver' => $ver])->lawlin
             <tbody>
             <?php foreach ($law_lines as $idx => $law_line) { ?>
             <tr>
-                <td><?= htmlspecialchars($law_line->{'條號'}) ?></td>
+                <td style="white-space: nowrap"><?= htmlspecialchars($law_line->{'條號'}) ?></td>
                 <td>
                     <p><?= nl2br(htmlspecialchars($law_line->{'內容'})) ?></p>
                     <?php if ($law_line->{'說明'}) { ?>
