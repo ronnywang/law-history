@@ -37,6 +37,12 @@ class LawAPI
             'size' => $limit,
             'from' => $limit * $page - $limit,
         ];
+        if ($params['law_id']) {
+            $api_params['law_id'] = $params['law_id'];
+            $cmd['query'] = [
+                'term' => ['法律代碼' => $params['law_id']],
+            ];
+        }
         if ($params['q']) {
             $api_params['q'] = $params['q'];
             $cmd['query']['bool']['should'][] = [
