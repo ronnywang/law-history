@@ -33,19 +33,37 @@ $law_lines = LawAPI::searchLawLine(['law_id' => $law_id, 'ver' => $ver])->lawlin
                 <tr>
                     <th>條號</th>
                     <th>內容</th>
-                    <th>理由</th>
                 </tr>
             </thead>
             <tbody>
-            <?php foreach ($law_lines as $law_line) { ?>
+            <?php foreach ($law_lines as $idx => $law_line) { ?>
             <tr>
                 <td><?= htmlspecialchars($law_line->{'條號'}) ?></td>
-                <td><?= nl2br(htmlspecialchars($law_line->{'內容'})) ?></td>
-                <td><?= nl2br(htmlspecialchars($law_line->{'說明'})) ?></td>
+                <td>
+                    <p><?= nl2br(htmlspecialchars($law_line->{'內容'})) ?></p>
+                    <?php if ($law_line->{'說明'}) { ?>
+                    <a href="#" class="btn btn-info btn-toggle" data-target="reason-<?= $idx ?>">說明</a>
+                    <?php } ?>
+
+                    <?php if ($law_line->{'說明'}) { ?>
+                    <div class="panel panel-default" id="reason-<?= $idx ?>" style="display: none">
+                        <div class="panel-heading">[說明]</div>
+                        <div class="panel-body">
+                            <?= nl2br(htmlspecialchars($law_line->{'說明'})) ?>
+                        </div>
+                    </div>
+                    <?php } ?>
+                </td>
             </tr>
             <?php } ?>
             </tbody>
         </table>
     </div>
 </div>
+<script>
+$('.btn-toggle').on('click', function(e){
+    e.preventDefault();
+    $('#' + $(this).data('target')).toggle();
+});
+</script>
 <?php include(__DIR__ . '/footer.php'); ?>
