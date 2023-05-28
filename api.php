@@ -4,7 +4,7 @@ include(__DIR__ . '/init.inc.php');
 $uri = explode('?', $_SERVER['REQUEST_URI'])[0];
 
 if (!preg_match('#/api/([^/]+)(.*)#', $uri, $matches)) {
-    readfile(__DIR__ . '/notfound.html');
+    include(__DIR__ . '/web.php');
     exit;
 }
 $method = strtolower($matches[1]);
@@ -34,50 +34,7 @@ if ($method == 'stat') {
     json_output($obj, JSON_UNESCAPED_UNICODE);
     exit;
 } elseif ($method == 'law') {
-    $page = @max($_GET['page'], 1);
-    $limit = @intval($_GET['limit']) ?: 100;
-    $cmd = [
-        'query' => [
-            'bool' => [
-                'must' => [],
-                'filter' => [],
-            ],
-        ],
-        'size' => $limit,
-        'from' => $limit * $page - $limit,
-    ];
-    if ($_GET['q']) {
-        $cmd['query']['bool']['should'][] = [
-            'match_phrase' => [
-                '最新名稱' => $_GET['q'],
-            ]
-        ];
-        $cmd['query']['bool']['should'][] = [
-            'match_phrase' => [
-                '其他名稱' => $_GET['q'],
-            ]
-        ];
-    }
-    try {
-        $obj = API::query('/law/_search', 'GET', json_encode($cmd));
-    } catch (Exception $e) {
-        echo $e->getMessage();
-        exit;
-    }
-
-    $records = array();
-    $ret = new StdClass;
-    $ret->total = $obj->hits->total;
-    $ret->limit = $limit;
-    $ret->totalpage = ceil($ret->total / $ret->limit);
-    $ret->page = $page;
-    foreach ($obj->hits->hits as $hit) {
-        $record = $hit->_source;
-        $records[] = $record;
-    }
-    $ret->data = $records;
-    json_output($ret);
-    exit;
+    json_output(LawAPI::searchLaw($_GET));
 } else if ($method == 'lawver') {
     $page = max($_GET['page'], 1);
     $cmd = [
