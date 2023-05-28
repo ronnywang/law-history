@@ -28,6 +28,7 @@ $law_lines = LawAPI::searchLawLine(['law_id' => $law_id, 'ver' => $ver])->lawlin
         </div>
     </div>
     <div class="col-md-9">
+        <label><input type="checkbox" class="toggle-enable-date">顯示法條修法時間</label>
         <table class="table">
             <thead>
                 <tr>
@@ -37,8 +38,14 @@ $law_lines = LawAPI::searchLawLine(['law_id' => $law_id, 'ver' => $ver])->lawlin
             </thead>
             <tbody>
             <?php foreach ($law_lines as $idx => $law_line) { ?>
-            <tr>
-                <td style="white-space: nowrap"><?= htmlspecialchars($law_line->{'條號'}) ?></td>
+            <tr id="<?= htmlspecialchars($law_line->{'法條代碼'}) ?>">
+                <td style="white-space: nowrap">
+                    <p>
+                    <a href="#<?= htmlspecialchars($law_line->{'法條代碼'}) ?>"><span class="glyphicon glyphicon-link" aria-hidden="true"></span></a>
+                    <?= htmlspecialchars($law_line->{'條號'}) ?>
+                    </p>
+                    <p class="enable-date" style="display:none"><?= htmlspecialchars($law_line->{'此法版本'}) ?></p>
+                </td>
                 <td>
                     <p><?= nl2br(htmlspecialchars($law_line->{'內容'})) ?></p>
                     <?php if ($law_line->{'說明'}) { ?>
@@ -64,6 +71,13 @@ $law_lines = LawAPI::searchLawLine(['law_id' => $law_id, 'ver' => $ver])->lawlin
 $('.btn-toggle').on('click', function(e){
     e.preventDefault();
     $('#' + $(this).data('target')).toggle();
+});
+$('.toggle-enable-date').on('change', function(e){
+    if ($(this).is(':checked')) {
+        $('.enable-date').show();
+    } else {
+        $('.enable-date').hide();
+    }
 });
 </script>
 <?php include(__DIR__ . '/footer.php'); ?>
