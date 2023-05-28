@@ -9,6 +9,6 @@ $obj = LawAPI::searchLaw($_GET);
 <hr>
 <code><?= htmlspecialchars($obj->api_url) ?></code>
 <?php foreach ($obj->data as $law_data) { ?>
-<h3><?= htmlspecialchars($law_data->{'最新名稱'}) ?></h3>
+<h3><a href="/law/<?= $law_data->{'法律代碼'} ?>"><?= htmlspecialchars($law_data->{'最新名稱'}) ?></a></h3>
 <?php } ?>
 <?php include(__DIR__ . '/footer.php'); ?>
