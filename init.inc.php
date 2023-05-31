@@ -4,6 +4,7 @@ if (file_exists(__DIR__ . '/config.php')) {
     include(__DIR__ . '/config.php');
 }
 include(__DIR__ . '/LawAPI.php');
+include(__DIR__ . '/BillAPI.php');
 
 class API
 {
