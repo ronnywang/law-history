@@ -136,7 +136,7 @@ class LawAPI
                     'filter' => [],
                 ],
             ],
-            'sort' => ['順序' => 'asc'],
+            'sort' => ['順序' => 'asc', '日期' => 'asc'],
             'size' => $limit,
             'from' => $limit* $page - $limit,
         ];
