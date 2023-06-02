@@ -1,6 +1,8 @@
 <?php
 $law_id = Param::get('law_id');
 $ret = LawAPI::searchLaw(['law_id' => $law_id]);
+Param::addAPI($ret->api_url, "取得 law_id={$law_id} 資料");
+
 if (!$ret->data) {
     include(__DIR__ . '/notfound.php');
     exit;
@@ -9,8 +11,13 @@ $law_data = $ret->data[0];
 if (!$ver = Param::get('ver')) {
     $ver = $law_data->{'現行版本號'};
 }
-$law_vers = LawAPI::searchLawVer(['law_id' => $law_id])->lawver;
-$law_lines = LawAPI::searchLawLine(['law_id' => $law_id, 'ver' => $ver])->lawline;
+
+$ret = LawAPI::searchLawVer(['law_id' => $law_id]);
+Param::addAPI($ret->api_url, "取得 law_id={$law_id} 的版本記錄");
+$law_vers = $ret->lawver;
+$ret = LawAPI::searchLawLine(['law_id' => $law_id, 'ver' => $ver]);
+Param::addAPI($ret->api_url, "取得 law_id={$law_id}, ver={$ver} 的條文記錄");
+$law_lines = $ret->lawline;
 ?>
 <?php include(__DIR__ . '/header.php'); ?>
 <h1><?= htmlspecialchars($law_data->{'最新名稱'}) ?></h1>

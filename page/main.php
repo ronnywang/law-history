@@ -1,5 +1,6 @@
 <?php
-$obj = LawAPI::searchLaw($_GET);
+$ret = LawAPI::searchLaw($_GET);
+Param::addAPI($ret->api_url, "取得本頁法律列表資料");
 ?>
 <?php include(__DIR__ . '/header.php'); ?>
 <form method="get">
@@ -7,8 +8,7 @@ $obj = LawAPI::searchLaw($_GET);
     <button type="submit">搜尋</button>
 </form>
 <hr>
-<code><?= htmlspecialchars($obj->api_url) ?></code>
-<?php foreach ($obj->data as $law_data) { ?>
+<?php foreach ($ret->data as $law_data) { ?>
 <h3><a href="/law/<?= $law_data->{'法律代碼'} ?>"><?= htmlspecialchars($law_data->{'最新名稱'}) ?></a></h3>
 <?php } ?>
 <?php include(__DIR__ . '/footer.php'); ?>
