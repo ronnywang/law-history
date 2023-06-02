@@ -12,6 +12,20 @@ class Param
     {
         return self::$values[$k];
     }
+
+    protected static $_apis = null;
+    public static function addAPI($url, $reason)
+    {
+        if (is_null(self::$_apis)) {
+            self::$_apis = [];
+        }
+        self::$_apis[] = [$url, $reason];
+    }
+
+    public static function getAPIs()
+    {
+        return self::$_apis;
+    }
 }
 
 $uri = explode('?', $_SERVER['REQUEST_URI'])[0];
