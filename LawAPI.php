@@ -105,7 +105,7 @@ class LawAPI
         $records->page = $page;
         $records->total = $obj->hits->total;
         $records->total_page = ceil($obj->hits->total / 100);
-        $records->api_url = self::getAPIURL('/api/law', $api_params);
+        $records->api_url = self::getAPIURL('/api/lawver', $api_params);
         $records->lawver= [];
         $meets = array();
         foreach ($obj->hits->hits as $hit) {
@@ -167,7 +167,7 @@ class LawAPI
         $records->page = $page;
         $records->total = $obj->hits->total;
         $records->total_page = ceil($obj->hits->total / 100);
-        $records->api_url = self::getAPIURL('/api/law', $api_params);
+        $records->api_url = self::getAPIURL('/api/lawline', $api_params);
         $records->lawline= [];
         $meets = array();
         foreach ($obj->hits->hits as $hit) {
