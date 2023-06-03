@@ -58,6 +58,7 @@ $law_lines = $ret->lawline;
                     <?php if ($law_line->{'說明'}) { ?>
                     <a href="#" class="btn btn-info btn-toggle" data-target="reason-<?= $idx ?>">說明</a>
                     <?php } ?>
+                    <a href="/lawline/<?= urlencode($law_id) ?>/<?= urlencode($law_line->{'法條代碼'}) ?>" class="btn btn-info">法條歷程</a>
 
                     <?php if ($law_line->{'說明'}) { ?>
                     <div class="panel panel-default" id="reason-<?= $idx ?>" style="display: none">

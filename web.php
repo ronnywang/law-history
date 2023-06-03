@@ -39,4 +39,9 @@ if ($uri == '/' or $uri == '') {
     }
     include(__DIR__ . '/page/law.php');
     exit;
+} else if (preg_match('#^/lawline/([^/]*)/(.*)$#', $uri, $matches)) {
+    Param::set('law_id', $matches[1]);
+    Param::set('lawline_id', urldecode($matches[2]));
+    include(__DIR__ . '/page/lawline.php');
+    exit;
 }
