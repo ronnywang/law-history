@@ -21,6 +21,7 @@ $law_lines = $ret->lawline;
 ?>
 <?php include(__DIR__ . '/header.php'); ?>
 <h1><?= htmlspecialchars($law_data->{'最新名稱'}) ?></h1>
+<h2><?= htmlspecialchars($ver) ?>版本全文</h2>
 <div class="row">
     <div class="col-md-3">
         <div class="panel panel-default">
@@ -36,6 +37,7 @@ $law_lines = $ret->lawline;
     </div>
     <div class="col-md-9">
         <label><input type="checkbox" class="toggle-enable-date">顯示法條修法時間</label>
+        <label><input type="checkbox" class="toggle-change-law">只顯示變動法條</label>
         <table class="table">
             <thead>
                 <tr>
@@ -45,7 +47,10 @@ $law_lines = $ret->lawline;
             </thead>
             <tbody>
             <?php foreach ($law_lines as $idx => $law_line) { ?>
-            <tr id="<?= htmlspecialchars($law_line->{'法條代碼'}) ?>">
+            <tr id="<?= htmlspecialchars($law_line->{'法條代碼'}) ?>"
+                class="law-tr
+                <?php if ($law_line->{'動作'} != '未變更') { ?> law-tr-change <?php } ?>
+                ">
                 <td style="white-space: nowrap">
                     <p>
                     <a href="#<?= htmlspecialchars($law_line->{'法條代碼'}) ?>"><span class="glyphicon glyphicon-link" aria-hidden="true"></span></a>
@@ -80,11 +85,20 @@ $('.btn-toggle').on('click', function(e){
     e.preventDefault();
     $('#' + $(this).data('target')).toggle();
 });
+
 $('.toggle-enable-date').on('change', function(e){
     if ($(this).is(':checked')) {
         $('.enable-date').show();
     } else {
         $('.enable-date').hide();
+    }
+});
+
+$('.toggle-change-law').on('change', function(e){
+    if ($(this).is(':checked')) {
+        $('.law-tr:not(.law-tr-change)').hide();
+    } else {
+        $('.law-tr').show();
     }
 });
 </script>
