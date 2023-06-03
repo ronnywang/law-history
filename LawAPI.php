@@ -173,7 +173,6 @@ class LawAPI
         $records->total_page = ceil($obj->hits->total / 100);
         $records->api_url = self::getAPIURL('/api/lawline', $api_params);
         $records->lawline= [];
-        $meets = array();
         foreach ($obj->hits->hits as $hit) {
             $record = $hit->_source;
             $records->lawline[] = $record;
