@@ -15,6 +15,11 @@ if (!$ver = Param::get('ver')) {
 $ret = LawAPI::searchLawVer(['law_id' => $law_id]);
 Param::addAPI($ret->api_url, "取得 law_id={$law_id} 的版本記錄");
 $law_vers = $ret->lawver;
+foreach ($law_vers as $law_ver) {
+    if ($law_ver->{'法律版本代碼'} == $ver) {
+        $current_law_ver = $law_ver;
+    }
+}
 $ret = LawAPI::searchLawLine(['law_id' => $law_id, 'ver' => $ver]);
 Param::addAPI($ret->api_url, "取得 law_id={$law_id}, ver={$ver} 的條文記錄");
 $law_lines = $ret->lawline;
@@ -39,8 +44,8 @@ $law_lines = $ret->lawline;
         <label><input type="checkbox" class="toggle-enable-date">顯示法條修法時間</label>
         <label><input type="checkbox" class="toggle-change-law">只顯示變動法條</label>
         <label><input type="checkbox" class="toggle-show-reason">顯示全部說明</label>
-        <?php if ($law_ver->{'版本種類'} == '三讀') { ?>
-        <a href="/lawver/<?= $law_id ?>/<?= urlencode($law_ver->{'法律版本代碼'}) ?>" class="btn btn-info">三讀歷程</a>
+        <?php if ($current_law_ver->{'版本種類'} == '三讀') { ?>
+        <a href="/lawver/<?= $law_id ?>/<?= urlencode($current_law_ver->{'法律版本代碼'}) ?>" class="btn btn-info">三讀歷程</a>
         <?php } ?>
         <table class="table">
             <thead>
