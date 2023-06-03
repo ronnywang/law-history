@@ -38,6 +38,7 @@ $law_lines = $ret->lawline;
     <div class="col-md-9">
         <label><input type="checkbox" class="toggle-enable-date">顯示法條修法時間</label>
         <label><input type="checkbox" class="toggle-change-law">只顯示變動法條</label>
+        <label><input type="checkbox" class="toggle-show-reason">顯示全部說明</label>
         <table class="table">
             <thead>
                 <tr>
@@ -66,7 +67,7 @@ $law_lines = $ret->lawline;
                     <a href="/lawline/<?= urlencode($law_id) ?>/<?= urlencode($law_line->{'法條代碼'}) ?>" class="btn btn-info">法條歷程</a>
 
                     <?php if ($law_line->{'說明'}) { ?>
-                    <div class="panel panel-default" id="reason-<?= $idx ?>" style="display: none">
+                    <div class="panel panel-default panel-reason" id="reason-<?= $idx ?>" style="display: none">
                         <div class="panel-heading">[說明]</div>
                         <div class="panel-body">
                             <?= nl2br(htmlspecialchars($law_line->{'說明'})) ?>
@@ -84,6 +85,14 @@ $law_lines = $ret->lawline;
 $('.btn-toggle').on('click', function(e){
     e.preventDefault();
     $('#' + $(this).data('target')).toggle();
+});
+
+$('.toggle-show-reason').on('change', function(e){
+    if ($(this).is(':checked')) {
+        $('.panel-reason').show();
+    } else {
+        $('.panel-reason').hide();
+    }
 });
 
 $('.toggle-enable-date').on('change', function(e){
