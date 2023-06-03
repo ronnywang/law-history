@@ -5,7 +5,7 @@
         <ul>
             <?php foreach (Param::getAPIs() as $url_reason) { ?>
             <li>
-            <?= htmlspecialchars($url_reason[1]) ?>: <code><?= htmlspecialchars($url_reason[0]) ?></code>
+            <?= htmlspecialchars($url_reason[1]) ?>: <input type="text" style="width: 300px" readonly="readonly" value="<?= htmlspecialchars($url_reason[0]) ?>">
             </li>
             <?php } ?>
         </ul>
