@@ -16,7 +16,7 @@
   </div>
   <ul class="nav navbar-nav">
       <li><a href="https://github.com/ronnywang/law-history" target="_blank">程式碼</a></li>
-      <li><a href="https://g0v.hackmd.io/Ds45AeOJQReU569q4pPIbQ" target="_blank">介紹共筆</a></li>
+      <li><a href="https://g0v.hackmd.io/@SA7CD7VRSp6Fcqw9CaElcQ/By0CawuI2" target="_blank">介紹共筆</a></li>
   </ul>
 
     <!-- Collect the nav links, forms, and other content for toggling -->
