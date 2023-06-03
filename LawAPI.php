@@ -9,7 +9,13 @@ class LawAPI
         }
         $terms = [];
         foreach ($params as $k => $v) {
-            $terms[] = urlencode($k) . '=' . urlencode($v);
+            if (is_array($v)) {
+                foreach ($v as $e) {
+                    $terms[] = urlencode($k) . '[]=' . urlencode($e);
+                }
+            } else {
+                $terms[] = urlencode($k) . '=' . urlencode($v);
+            }
         }
         return $prefix . '?' . implode('&', $terms);
     }
