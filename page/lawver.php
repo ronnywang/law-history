@@ -15,6 +15,13 @@ if (!$ver = Param::get('ver')) {
 $ret = LawAPI::searchLawVer(['law_id' => $law_id, 'ver' => $ver]);
 Param::addAPI($ret->api_url, "取得 law_id={$law_id} 的版本記錄");
 $law_ver = $ret->lawver[0];
+
+$idmap = new StdClass;
+if ($billids = $ret->bill_id) {
+    $ret = BillAPI::searchBillIDMap(['id' => $billids]);
+    Param::addAPI($ret->api_url, sprintf("取得 %s 等 ID 的 billNo", mb_strimwidth(implode(',', $billids), 0, 30, '...')));
+    $idmap = $ret->map;
+}
 ?>
 <?php include(__DIR__ . '/header.php'); ?>
 <h1><?= htmlspecialchars($law_data->{'最新名稱'}) ?></h1>
@@ -40,6 +47,9 @@ $law_ver = $ret->lawver[0];
         <td>
             <?php foreach ($data->{'關係文書'} as $rel) { ?>
             <a href="<?= htmlspecialchars($rel[1]) ?>"><?= htmlspecialchars($rel[0]) ?></a>
+                <?php if (array_key_exists(2, $rel) and property_exists($idmap, $rel[2])) { ?>
+                <a href="https://ppg.ly.gov.tw/ppg/bills/<?= urlencode($idmap->{$rel[2]}) ?>/details">議案資料</a>
+                <?php } ?>
             <?php } ?>
         </td>
     </tr>

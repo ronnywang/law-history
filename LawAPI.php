@@ -116,10 +116,23 @@ class LawAPI
         $records->total = $obj->hits->total;
         $records->total_page = ceil($obj->hits->total / 100);
         $records->api_url = self::getAPIURL('/api/lawver', $api_params);
-        $records->lawver= [];
-        $meets = array();
+        $records->lawver = [];
+        $records->bill_id = [];
         foreach ($obj->hits->hits as $hit) {
             $record = $hit->_source;
+            if (property_exists($record, '修訂歷程')) {
+                foreach ($record->{'修訂歷程'} as $idx1 => $data) {
+                    if (!property_exists($data, '關係文書')) {
+                        continue;
+                    }
+                    foreach ($data->{'關係文書'} as $idx2 => $relbook) {
+                        if (preg_match('#:(LCEWA[0-9_]+)#', $relbook[1], $matches)) {
+                            $records->bill_id[] = $matches[1];
+                            $record->{'修訂歷程'}[$idx1]->{'關係文書'}[$idx2][2] = $matches[1];
+                        }
+                    }
+                }
+            }
             $records->lawver[] = $record;
         }
         return $records;
