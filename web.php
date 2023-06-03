@@ -39,6 +39,11 @@ if ($uri == '/' or $uri == '') {
     }
     include(__DIR__ . '/page/law.php');
     exit;
+} else if (preg_match('#^/lawver/([^/]*)/(.*)?$#', $uri, $matches)) {
+    Param::set('law_id', $matches[1]);
+    Param::set('ver', urldecode($matches[2]));
+    include(__DIR__ . '/page/lawver.php');
+    exit;
 } else if (preg_match('#^/lawline/([^/]*)/(.*)$#', $uri, $matches)) {
     Param::set('law_id', $matches[1]);
     Param::set('lawline_id', urldecode($matches[2]));

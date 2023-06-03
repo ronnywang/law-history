@@ -39,6 +39,9 @@ $law_lines = $ret->lawline;
         <label><input type="checkbox" class="toggle-enable-date">顯示法條修法時間</label>
         <label><input type="checkbox" class="toggle-change-law">只顯示變動法條</label>
         <label><input type="checkbox" class="toggle-show-reason">顯示全部說明</label>
+        <?php if ($law_ver->{'版本種類'} == '三讀') { ?>
+        <a href="/lawver/<?= $law_id ?>/<?= urlencode($law_ver->{'法律版本代碼'}) ?>" class="btn btn-info">三讀歷程</a>
+        <?php } ?>
         <table class="table">
             <thead>
                 <tr>
