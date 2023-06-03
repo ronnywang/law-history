@@ -20,9 +20,9 @@ class BillAPI
         $obj = API::query('/billidmap/_search', 'GET', json_encode($cmd));
         $records = new StdClass;
         $records->api_url = LawAPI::getAPIURL('/api/billidmap', $api_params);
-        $records->map = [];
+        $records->map = new StdClass;
         foreach ($obj->hits->hits as $hit) {
-            $records->map[$hit->_id] = $hit->_source->billNo;
+            $records->map->{$hit->_id} = $hit->_source->billNo;
         }
         return $records;
     }
