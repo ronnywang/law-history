@@ -41,6 +41,8 @@ if ($method == 'stat') {
     json_output(LawAPI::searchLawLine($_GET));
 } else if ($method == 'billdata') {
     json_output(BillAPI::getBillData($_GET['billNo']));
+} else if ($method == 'billidmap') {
+    json_output(BillAPI::searchBillIDMap($_GET));
 } else {
     readfile(__DIR__ . '/notfound.html');
     exit;
