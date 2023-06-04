@@ -104,33 +104,5 @@ foreach ($ret->lawline as $law_line) {
     </div>
 </div>
 <script>
-$('.btn-toggle').on('click', function(e){
-    e.preventDefault();
-    $('#' + $(this).data('target')).toggle();
-});
-
-$('.toggle-show-reason').on('change', function(e){
-    if ($(this).is(':checked')) {
-        $('.panel-reason').show();
-    } else {
-        $('.panel-reason').hide();
-    }
-});
-
-$('.toggle-enable-date').on('change', function(e){
-    if ($(this).is(':checked')) {
-        $('.enable-date').show();
-    } else {
-        $('.enable-date').hide();
-    }
-});
-
-$('.toggle-change-law').on('change', function(e){
-    if ($(this).is(':checked')) {
-        $('.law-tr:not(.law-tr-change)').hide();
-    } else {
-        $('.law-tr').show();
-    }
-});
 </script>
 <?php include(__DIR__ . '/footer.php'); ?>
