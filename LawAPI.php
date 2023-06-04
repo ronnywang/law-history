@@ -204,6 +204,10 @@ class LawAPI
         $records->lawline= [];
         foreach ($obj->hits->hits as $hit) {
             $record = $hit->_source;
+            $record->_id = $hit->_id;
+            if ($record->{'前法版本'}) {
+                $record->_prev_id = "{$record->{'法律代碼'}}-{$record->{'前法版本'}}-{$record->{'法條代碼'}}";
+            }
             $records->lawline[] = $record;
         }
         return $records;
