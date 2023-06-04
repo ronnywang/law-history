@@ -27,6 +27,7 @@ if ($billids = $ret->bill_id) {
 <h1><?= htmlspecialchars($law_data->{'最新名稱'}) ?></h1>
 <h2><?= htmlspecialchars($ver) ?> 三讀歷程記錄</h2>
 <a href="/law/<?= $law_id ?>/<?= urlencode($ver) ?>" class="btn btn-info">瀏覽版本全文</a>
+<a href="/lawdiff/<?= $law_id ?>/<?= urlencode($ver) ?>" class="btn btn-info">法案對照表</a>
 <table class="table">
     <thead>
         <tr>

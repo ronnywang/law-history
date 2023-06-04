@@ -47,6 +47,7 @@ $law_lines = $ret->lawline;
         <?php if ($current_law_ver->{'版本種類'} == '三讀') { ?>
         <a href="/lawver/<?= $law_id ?>/<?= urlencode($current_law_ver->{'法律版本代碼'}) ?>" class="btn btn-info">三讀歷程</a>
         <?php } ?>
+        <a href="/lawdiff/<?= $law_id ?>/<?= urlencode($current_law_ver->{'法律版本代碼'}) ?>" class="btn btn-info">法案對照表</a>
         <table class="table">
             <thead>
                 <tr>
