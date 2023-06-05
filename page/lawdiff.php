@@ -78,13 +78,9 @@ foreach ($ret->lawline as $law_line) {
                     <p class="enable-date" style="display:none"><?= htmlspecialchars($law_line->{'此法版本'}) ?></p>
                 </td>
             </tr>
-            <tr>
-                <td>
-                    <p><?= nl2br(htmlspecialchars($law_line->{'內容'})) ?></p>
-                </td>
-                <td>
-                    <p><?= nl2br(htmlspecialchars($prev_law_lines->{$law_line->_prev_id}->{'內容'})) ?></p>
-                </td>
+            <tr class="diff-tr">
+                <td data-content="<?= htmlspecialchars($law_line->{'內容'}) ?>"><?= nl2br(htmlspecialchars($law_line->{'內容'})) ?></td>
+                <td data-content="<?= htmlspecialchars($prev_law_lines->{$law_line->_prev_id}->{'內容'}) ?>"><?= nl2br(htmlspecialchars($prev_law_lines->{$law_line->_prev_id}->{'內容'})) ?></td>
             </tr>
             <?php if ($law_line->{'說明'}) { ?>
             <tr>
@@ -104,5 +100,41 @@ foreach ($ret->lawline as $law_line) {
     </div>
 </div>
 <script>
+
+var get_dom_from_diff = function(texta, textb, type) {
+    diff = Diff.diffChars(texta, textb);
+    fragment = document.createDocumentFragment();
+	diff.forEach((part) => {
+		// green for additions, red for deletions
+		// grey for common parts
+		const color = part.added ? 'green' :
+			part.removed ? 'red' : 'grey';
+		if (type == 'new' && part.added) { return ; }
+		if (type == 'old' && part.removed) { return ; }
+		span = document.createElement('span');
+		span.style.color = color;
+		lines = part.value.split("\n");
+		for (var i = 0; i < lines.length; i ++) {
+			if (i) {
+				span.appendChild(document.createElement('br'));
+			}
+
+			span.appendChild(document
+				.createTextNode(lines[i]));
+		}
+		fragment.appendChild(span);
+	});
+	return fragment;
+};
+
+
+$('.diff-tr').each(function(){
+    var tr_dom = $(this);
+    var texta = $('td', tr_dom).eq(0).data('content');
+    var textb = $('td', tr_dom).eq(1).data('content');
+    $('td', tr_dom).eq(0).html(get_dom_from_diff(textb, texta, 'old'));
+    $('td', tr_dom).eq(1).html(get_dom_from_diff(textb, texta, 'new'));
+});
+
 </script>
 <?php include(__DIR__ . '/footer.php'); ?>
