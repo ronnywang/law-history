@@ -107,12 +107,12 @@ var get_dom_from_diff = function(texta, textb, type) {
 	diff.forEach((part) => {
 		// green for additions, red for deletions
 		// grey for common parts
-		const color = part.added ? 'green' :
-			part.removed ? 'red' : 'grey';
+		const color = part.added ? '#bedeac' :
+			part.removed ? '#ffbdbd' : '';
 		if (type == 'new' && part.added) { return ; }
 		if (type == 'old' && part.removed) { return ; }
 		span = document.createElement('span');
-		span.style.color = color;
+		span.style['background-color'] = color;
 		lines = part.value.split("\n");
 		for (var i = 0; i < lines.length; i ++) {
 			if (i) {
