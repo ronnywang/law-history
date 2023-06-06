@@ -45,4 +45,21 @@ class BillAPI
         }
         return $ret;
     }
+
+    public static function getBillHTML($billNo)
+    {
+        $ret = new StdClass;
+        $content = gzdecode(file_get_contents("https://lydata.ronny-s3.click/bill-doc-parsed/html/{$billNo}.doc.gz"));
+        if (!$content) {
+            $content = gzdecode(file_get_contents("https://lydata.ronny-s3.click/bill-doc-parsed/html/{$billNo}-0.doc.gz"));
+        }
+
+        if ($content) {
+            $obj = json_decode($content);
+            $content = (base64_decode($obj->content));
+            $content = preg_replace('#<img src="([^"]*)" name="DW\d+" alt="DW\d+" align="left" hspace="12" width="610"/>\n#', '', $content);
+            return $content;
+        }
+        return '';
+    }
 }
