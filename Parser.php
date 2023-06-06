@@ -381,6 +381,33 @@ return;
                 }
             }
         }
+
+        $record->{'總說明'} = '';
+        if (property_exists($record, '對照表標題')) {
+            foreach ($doc->getElementsByTagName('span') as $span_dom) {
+                if ($span_dom->nodeValue == $record->{'對照表標題'} . '總說明') {
+                    $p_dom = $span_dom;
+                    while ($p_dom = $p_dom->parentNode) {
+                        if ($p_dom->nodeName == 'p') {
+                            break;
+                        }
+                    }
+                    if ($p_dom) {
+                        while ($p_dom = $p_dom->nextSibling) {
+                            if ($p_dom->nodeName == '#text') {
+                                continue;
+                            }
+                            if ($p_dom->nodeName != 'p') {
+                                break;
+                            }
+                            $record->{'總說明'} .= trim($p_dom->nodeValue) . "\n";
+                        }
+                    }
+                }
+            }
+            $record->{'總說明'} = trim($record->{'總說明'});
+        }
+
         return $record;
     }
 }
