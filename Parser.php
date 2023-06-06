@@ -218,6 +218,9 @@ return;
         $record->billNo = $billNo;
 
         $doc = new DOMDocument;
+        if (!$content) {
+            throw new Exception("{$billNo} no content");
+        }
         $content = preg_replace('#<img src="([^"]*)" name="DW\d+" alt="DW\d+" align="left" hspace="12" width="610"/>\n#', '', $content);
         @$doc->loadHTML($content);
         foreach ($doc->getElementsByTagName('meta') as $meta_dom) {
@@ -269,6 +272,7 @@ return;
                         $tr_doms[] = $tbody_dom;
                     }
                 }
+                $columns = array();
                 while ($tr_dom = array_shift($tr_doms)) {
                     $td_doms = array();
                     $only_first = true;
@@ -298,7 +302,6 @@ return;
                     } else if (in_array(self::onlystr($td_doms[0]->nodeValue), array('審查會通過條文', '審查會通過', '審查會條文'))) {
                         // TODO: 審查會通過條文 (處理多筆字號)
                         unset($record->{'字號'});
-                        $columns = array();
                         foreach ($td_doms as $idx => $td_dom) {
                             if (in_array(self::onlystr($td_dom->nodeValue), array('審查會通過條文', '審查會通過', '審查會條文'))) {
                                 $columns['審查會通過條文'] = $idx;
