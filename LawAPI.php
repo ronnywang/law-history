@@ -116,6 +116,10 @@ class LawAPI
             $api_params['ver'] = $params['ver'];
             $cmd['query']['bool']['must'][] = ['term' => ['法律版本代碼' => $params['ver']]];
         }
+        if ($params['type']) {
+            $api_params['type'] = $params['type'];
+            $cmd['query']['bool']['must'][] = ['term' => ['版本種類' => $params['type']]];
+        }
         $obj = API::query('law', '/lawver/_search', 'GET', json_encode($cmd));
         $records = new StdClass;
         $records->page = $page;
