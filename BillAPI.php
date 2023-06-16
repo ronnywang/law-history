@@ -17,7 +17,7 @@ class BillAPI
             }
             $cmd['query']['ids'] = ['values' => $params['id']];
         }
-        $obj = API::query('/billidmap/_search', 'GET', json_encode($cmd));
+        $obj = API::query('bill', '/billidmap/_search', 'GET', json_encode($cmd));
         $records = new StdClass;
         $records->api_url = LawAPI::getAPIURL('/api/billidmap', $api_params);
         $records->map = new StdClass;

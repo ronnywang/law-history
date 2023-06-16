@@ -8,8 +8,12 @@ include(__DIR__ . '/BillAPI.php');
 
 class API
 {
-    public static function query($url, $method = 'GET', $data = null) {
-        $curl = curl_init(getenv('SEARCH_URL') . $url);
+    public static function query($type, $url, $method = 'GET', $data = null) {
+        if ($type == 'bill') {
+            $curl = curl_init(getenv('BILL_SEARCH_URL') . $url);
+        } else {
+            $curl = curl_init(getenv('LAW_SEARCH_URL') . $url);
+        }
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         if (!is_null($method)) {
             curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $method);

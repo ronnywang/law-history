@@ -63,7 +63,7 @@ class LawAPI
             ];
         }
         try {
-            $obj = API::query('/law/_search', 'GET', json_encode($cmd));
+            $obj = API::query('law', '/law/_search', 'GET', json_encode($cmd));
         } catch (Exception $e) {
             echo $e->getMessage();
             exit;
@@ -116,7 +116,7 @@ class LawAPI
             $api_params['ver'] = $params['ver'];
             $cmd['query']['bool']['must'][] = ['term' => ['法律版本代碼' => $params['ver']]];
         }
-        $obj = API::query('/lawver/_search', 'GET', json_encode($cmd));
+        $obj = API::query('law', '/lawver/_search', 'GET', json_encode($cmd));
         $records = new StdClass;
         $records->page = $page;
         $records->total = $obj->hits->total;
@@ -194,7 +194,7 @@ class LawAPI
             ];
         }
 
-        $obj = API::query('/lawline/_search', 'GET', json_encode($cmd));
+        $obj = API::query('law', '/lawline/_search', 'GET', json_encode($cmd));
         $records = new StdClass;
         $records->query = $cmd['query'];
         $records->page = $page;
