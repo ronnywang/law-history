@@ -201,11 +201,11 @@ class LawAPI
                 ],
             ],
         ];
-        if ($params['law_id']) {
+        if (array_key_exists('law_id', $params) and $params['law_id']) {
             $api_params['law_id'] = $params['law_id'];
             $cmd['query']['bool']['must'][] = ['term' => ['法律代碼' => $params['law_id']]];
         }
-        if ($params['ver']) {
+        if (array_key_exists('ver', $params) and $params['ver']) {
             $api_params['ver'] = $params['ver'];
             $cmd['query']['bool']['must'][] = ['term' => ['法律版本代碼' => $params['ver']]];
         }
@@ -274,27 +274,27 @@ class LawAPI
             'size' => $limit,
             'from' => $limit* $page - $limit,
         ];
-        if ($params['id']) {
+        if (array_key_exists('id', $params) and $params['id']) {
             $api_params['id'] = $params['id'];
             $cmd['query']['bool']['must'][] = ['ids' => ['values' => $params['id']]];
         }
-        if ($params['law_id']) {
+        if (array_key_exists('law_id', $params) and $params['law_id']) {
             $api_params['law_id'] = $params['law_id'];
             $cmd['query']['bool']['must'][] = ['term' => ['法律代碼' => $params['law_id']]];
         }
-        if ($params['line_no']) {
+        if (array_key_exists('line_no', $params) and $params['line_no']) {
             $api_params['line_no'] = $params['line_no'];
             $cmd['query']['bool']['must'][] = ['term' => ['條號' => $params['line_no']]];
         }
-        if ($params['ver']) {
+        if (array_key_exists('ver', $params) and $params['ver']) {
             $api_params['ver'] = $params['ver'];
             $cmd['query']['bool']['must'][] = ['term' => ['法律版本代碼' => $params['ver']]];
         }
-        if ($params['lawline_id']) {
+        if (array_key_exists('lawline_id', $params) and $params['lawline_id']) {
             $api_params['lawline_id'] = $params['lawline_id'];
             $cmd['query']['bool']['must'][] = ['term' => ['法條代碼' => $params['lawline_id']]];
         }
-        if ($params['q']) {
+        if (array_key_exists('q', $params) and $params['q']) {
             $api_params['q'] = $params['q'];
             $cmd['query']['bool']['must'][] = [
                 'match_phrase' => [
