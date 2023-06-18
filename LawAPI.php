@@ -248,6 +248,11 @@ class LawAPI
                 } elseif (property_exists($record->{'議案資料'}->detail, '審查委員會')) {
                     $proposal = $record->{'議案資料'}->detail->{'審查委員會'};
                 }
+                if ($record->{'議案資料'}->detail->{'議案狀態'} == '三讀') {
+                    $date = array_pop(array_pop($record->{'議案資料'}->detail->{'議案流程'})->{'日期'});
+                    list($y, $m, $d) = explode('/', $date);
+                    $record->{'三讀日期'} = intval(sprintf("%04d%02d%02d", $y + 1911, $m, $d));
+                }
                 $record->{'版本名稱'} = BillAPI::getBillName(
                     $proposal,
                     $record->{'議案資料'}->detail->{'議案名稱'},

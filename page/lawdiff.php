@@ -63,8 +63,16 @@ foreach ($ret->lawline as $law_line) {
             <div class="panel-heading">三讀歷程</div>
             <div class="panel-body">
                 <div class="list-group">
+                    <?php if ($current_law_ver->{'前版本代碼'}) { ?>
+                    <a class="list-group-item" href="/law/<?= $law_data->{'法律代碼'} ?>/<?= urlencode($current_law_ver->{'前版本代碼'}) ?>">[前版本] <?= htmlspecialchars($current_law_ver->{'前版本代碼'}) ?></a>
+                    <?php } ?>
+
                     <?php foreach ($current_law_ver->{'議案資料'}->detail->{'關連議案'} as $rel_bill) { ?>
                     <a class ="list-group-item" href="/lawdiff/<?= $law_data->{'法律代碼'} ?>/bill-<?= urlencode($rel_bill->billNo) ?>"><?= htmlspecialchars($rel_bill->title) ?></a>
+                    <?php } ?>
+
+                    <?php if ($current_law_ver->{'三讀日期'}) { ?>
+                    <a class="list-group-item" href="/law/<?= $law_data->{'法律代碼'} ?>/<?= urlencode($current_law_ver->{'三讀日期'} . '-三讀') ?>">[後版本] <?= htmlspecialchars($current_law_ver->{'三讀日期'} . '-三讀') ?></a>
                     <?php } ?>
                 </div>
             </div>
