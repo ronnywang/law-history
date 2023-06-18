@@ -68,7 +68,7 @@ foreach ($ret->lawline as $law_line) {
                     <?php } ?>
 
                     <?php foreach ($current_law_ver->{'議案資料'}->detail->{'關連議案'} as $rel_bill) { ?>
-                    <a class ="list-group-item" href="/lawdiff/<?= $law_data->{'法律代碼'} ?>/bill-<?= urlencode($rel_bill->billNo) ?>"><?= htmlspecialchars($rel_bill->title) ?></a>
+                    <a class ="list-group-item <?= $rel_bill->billNo == $current_law_ver->{'議案資料'}->detail->billNo ? ' active' : '' ?>" href="/lawdiff/<?= $law_data->{'法律代碼'} ?>/bill-<?= urlencode($rel_bill->billNo) ?>"><?= htmlspecialchars($rel_bill->title) ?></a>
                     <?php } ?>
 
                     <?php if ($current_law_ver->{'三讀日期'}) { ?>

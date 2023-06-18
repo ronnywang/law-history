@@ -265,7 +265,22 @@ class LawAPI
                         $record->{'法律名稱'}
                     );
                 }
+                $bill = new StdClass;
+                $bill->billNo = $record->{'議案資料'}->detail->billNo;
+                $bill->{'提案人'} = $record->{'議案資料'}->detail->{'提案單位/提案委員'};
+                $bill->{'議案名稱'} = $record->{'議案資料'}->detail->{'議案名稱'};
+                $bill->title = BillAPI::getBillName(
+                    $bill->{'提案人'},
+                    $bill->{'議案名稱'},
+                    $record->{'法律名稱'}
+                );
+
+                $record->{'議案資料'}->detail->{'關連議案'}[] = $bill;
             }
+
+            usort($record->{'議案資料'}->detail->{'關連議案'}, function($a, $b) {
+                return strcmp($a->billNo, $b->billNo);
+            });
 
             if (property_exists($record, '修訂歷程')) {
                 foreach ($record->{'修訂歷程'} as $idx1 => $data) {
