@@ -37,6 +37,7 @@ $law_lines = $ret->lawline;
 <div class="row">
     <div class="col-md-3">
         <div class="panel panel-default">
+            <?php if ($current_law_ver->{'版本種類'} == '三讀') { ?>
             <div class="panel-heading">版本歷程</div>
             <div class="panel-body">
                 <div class="list-group">
@@ -45,6 +46,16 @@ $law_lines = $ret->lawline;
                     <?php } ?>
                 </div>
             </div>
+            <?php } elseif ($current_law_ver->{'版本種類'} == '議案') { ?>
+            <div class="panel-heading">三讀歷程</div>
+            <div class="panel-body">
+                <div class="list-group">
+                    <?php foreach ($current_law_ver->{'議案資料'}->detail->{'關連議案'} as $rel_bill) { ?>
+                    <a class ="list-group-item" href="/law/<?= $law_data->{'法律代碼'} ?>/bill-<?= urlencode($rel_bill->billNo) ?>"><?= htmlspecialchars($rel_bill->title) ?></a>
+                    <?php } ?>
+                </div>
+            </div>
+            <?php } ?>
         </div>
     </div>
     <div class="col-md-9">
