@@ -269,12 +269,7 @@ class LawAPI
                 $bill->billNo = $record->{'議案資料'}->detail->billNo;
                 $bill->{'提案人'} = $record->{'議案資料'}->detail->{'提案單位/提案委員'};
                 $bill->{'議案名稱'} = $record->{'議案資料'}->detail->{'議案名稱'};
-                $bill->title = BillAPI::getBillName(
-                    $bill->{'提案人'},
-                    $bill->{'議案名稱'},
-                    $record->{'法律名稱'}
-                );
-
+                $bill->title = $record->{'版本名稱'};
                 $record->{'議案資料'}->detail->{'關連議案'}[] = $bill;
             }
 
