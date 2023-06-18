@@ -124,15 +124,17 @@ class LawAPI
         $lawver->{'前版本代碼'} = null;
         $lawver->{'日期'} = intval($commit_at);
         $lawver->{'動作'} = $action;
-        $lawver->{'法律名稱'} = $title;
+        $lawver->{'法律名稱'} = '';
         $lawver->{'議案資料'} = $bill_data;
-
-        $title = $bill_data->detail->{'提案單位/提案委員'} . $bill_data->detail->{'議案名稱'};
-        $title = preg_replace('#^本院委員#', '', $title);
-        $title = preg_replace('#，請審議案。$#', '', $title);
 
         $bill_type = $bill_data->docData->{'立法種類'};
         if ($bill_type == '修正條文') {
+            $title = $bill_data->docData->{'對照表標題'};
+            if (preg_match('#(.*)第.*條條文修正草案對照表#u', $title, $matches)) {
+                $lawver->{'法律名稱'} = $matches[1];
+            } else {
+                throw new Exception("未知的對照表標題: " . $title);
+            }
             foreach ($bill_data->docData->{'修正記錄'} as $record) {
                 list($lineno, $content) = explode('　', $record['現行條文'], 2);
 
