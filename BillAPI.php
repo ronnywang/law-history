@@ -67,4 +67,25 @@ class BillAPI
         }
         return '';
     }
+
+    public static function getBillName($proposal, $title, $lawname = '')
+    {
+        $proposal = preg_replace('#^本院委員#', '', $proposal);
+        $proposal = preg_replace('#^本院#', '', $proposal);
+        $proposal = preg_replace('#等\d+人$#', '', $proposal);
+        if (preg_match('#「(.*)」，請審議案。$#u', $title, $matches)) {
+            $title = $matches[1];
+        }
+        if (strpos($title, $lawname) === 0) {
+            $title = substr($title, strlen($lawname));
+        }
+        if (strpos($title, '報告併案審查') === 0) {
+            $title = '報告併案審查';
+        }
+        $title = preg_replace('#條文修正草案$#', '', $title);
+        if ($title == '部分') {
+            $title = '部分條文';
+        }
+        return $proposal . '-' . $title;
+    }
 }
