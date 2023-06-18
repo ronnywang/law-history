@@ -258,6 +258,18 @@ return;
                         throw new Exception("table not found");
                     }
                 }
+
+                // 如果是審查會通過版本，標題頭可能會在另一個 table ，因此需要往上抓
+                if ($record->{'立法種類'} == '審查會版本') {
+                    $title_table_dom = $table_dom;
+                    while ($title_table_dom = $title_table_dom->previousSibling) {
+                        if ($title_table_dom->nodeName == 'table' and preg_match('#條文對照表$#', trim($title_table_dom->nodeValue))) {
+                            $record->{'對照表標題'} = preg_replace('#\s+#', '', $title_table_dom->nodeValue);
+                            $record->{'對照表標題'} = str_replace('」', '', $record->{'對照表標題'});
+                            break;
+                        }
+                    }
+                }
                 $record->{'修正記錄'} = array();
                 $tr_doms = array();
                 foreach ($table_dom->childNodes as $tbody_dom) {

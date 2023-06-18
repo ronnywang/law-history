@@ -128,9 +128,9 @@ class LawAPI
         $lawver->{'議案資料'} = $bill_data;
 
         $bill_type = $bill_data->docData->{'立法種類'};
-        if ($bill_type == '修正條文') {
+        if ($bill_type == '修正條文' or $bill_type == '審查會版本') {
             $title = $bill_data->docData->{'對照表標題'};
-            if (preg_match('#(.*法)(第.*條|部分)條文修正草案對照表#u', $title, $matches)) {
+            if (preg_match('#(.*法)(第.*條|部分)條文修正草案(條文)?對照表#u', $title, $matches)) {
                 $lawver->{'法律名稱'} = $matches[1];
             } else {
                 throw new Exception("未知的對照表標題: " . $title);
@@ -167,10 +167,11 @@ class LawAPI
 					break;
                 }
                 if (is_null($lawline)) {
-                    // TODO: 找不到對應的法律
-                    return false;
+                    throw new Exception("找不到 {$content}");
                 }
             }
+        } else {
+            throw new Exception("未支援立法種類: {$bill_type}");
         }
 		$bulk_insert_pool[] = ['lawver', implode('-', [$lawver->{'法律代碼'}, $lawver->{'法律版本代碼'}]), $lawver];
         foreach ($bulk_insert_pool as $bulk_insert) {
@@ -227,8 +228,13 @@ class LawAPI
 
         // 如果找不到資料並且是 bill-xxxx 開頭的，嘗試線上直接更新資料
         if (!count($obj->hits->hits) and array_key_exists('ver', $params) and strpos($params['ver'], 'bill-') === 0) {
-            if (self::updateBillData($params)) {
-                return self::searchLawVer($params);
+            try {
+                if (self::updateBillData($params)) {
+                    return self::searchLawVer($params);
+                }
+            } catch (Exception $e) {
+                echo json_encode(['error' => true, 'message' => $e->getMessage()]);
+                exit;
             }
         }
 
@@ -237,8 +243,13 @@ class LawAPI
             $record->_id = $hit->_id;
             $record->{'版本名稱'} = $record->{'法律版本代碼'};
             if (property_exists($record, '議案資料')) {
+                if (property_exists($record->{'議案資料'}->detail, '提案單位/提案委員')) {
+                    $proposal = $record->{'議案資料'}->detail->{'提案單位/提案委員'};
+                } elseif (property_exists($record->{'議案資料'}->detail, '審查委員會')) {
+                    $proposal = $record->{'議案資料'}->detail->{'審查委員會'};
+                }
                 $record->{'版本名稱'} = BillAPI::getBillName(
-                    $record->{'議案資料'}->detail->{'提案單位/提案委員'},
+                    $proposal,
                     $record->{'議案資料'}->detail->{'議案名稱'},
                     $record->{'法律名稱'}
                 );
