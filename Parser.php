@@ -221,7 +221,7 @@ return;
         if (!$content) {
             throw new Exception("{$billNo} no content");
         }
-        $content = preg_replace('#<img src="([^"]*)" name="DW\d+" alt="DW\d+" align="left" hspace="12" width="610"/>\n#', '', $content);
+        $content = preg_replace('#<img src="([^"]*)" name="DW\d+" alt="DW\d+" align="left" hspace="12" width="\d+"/>\n#', '', $content);
         @$doc->loadHTML($content);
         foreach ($doc->getElementsByTagName('meta') as $meta_dom) {
             if ($meta_dom->getAttribute('name') == 'created') {

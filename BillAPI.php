@@ -62,7 +62,7 @@ class BillAPI
         if ($content) {
             $obj = json_decode($content);
             $content = (base64_decode($obj->content));
-            $content = preg_replace('#<img src="([^"]*)" name="DW\d+" alt="DW\d+" align="left" hspace="12" width="610"/>\n#', '', $content);
+            $content = preg_replace('#<img src="([^"]*)" name="DW\d+" alt="DW\d+" align="left" hspace="12" width="\d+"/>\n#', '', $content);
             return $content;
         }
         return '';
