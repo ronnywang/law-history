@@ -181,6 +181,10 @@ class LawAPI
             $api_params['law_id'] = $params['law_id'];
             $cmd['query']['bool']['must'][] = ['term' => ['法律代碼' => $params['law_id']]];
         }
+        if ($params['line_no']) {
+            $api_params['line_no'] = $params['line_no'];
+            $cmd['query']['bool']['must'][] = ['term' => ['條號' => $params['line_no']]];
+        }
         if ($params['ver']) {
             $api_params['ver'] = $params['ver'];
             $cmd['query']['bool']['must'][] = ['term' => ['法律版本代碼' => $params['ver']]];
