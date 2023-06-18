@@ -50,6 +50,7 @@ if ($billids = $ret->bill_id) {
             <a href="<?= htmlspecialchars($rel[1]) ?>"><?= htmlspecialchars($rel[0]) ?></a>
                 <?php if (array_key_exists(2, $rel) and property_exists($idmap, $rel[2])) { ?>
                 <a href="https://ppg.ly.gov.tw/ppg/bills/<?= urlencode($idmap->{$rel[2]}) ?>/details">議案資料</a>
+                <a href="/law/<?= $law_id ?>/bill-<?= $idmap->{$rel[2]} ?>">條文</a>
                 <?php } ?>
             <?php } ?>
         </td>

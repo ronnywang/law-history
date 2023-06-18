@@ -221,6 +221,14 @@ class LawAPI
         $records->api_url = self::getAPIURL('/api/lawver', $api_params);
         $records->lawver = [];
         $records->bill_id = [];
+
+        // 如果找不到資料並且是 bill-xxxx 開頭的，嘗試線上直接更新資料
+        if (!count($obj->hits->hits) and array_key_exists('ver', $params) and strpos($params['ver'], 'bill-') === 0) {
+            if (self::updateBillData($params)) {
+                return self::searchLawVer($params);
+            }
+        }
+
         foreach ($obj->hits->hits as $hit) {
             $record = $hit->_source;
             if (property_exists($record, '修訂歷程')) {
