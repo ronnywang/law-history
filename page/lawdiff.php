@@ -12,8 +12,8 @@ if (!$ver = Param::get('ver')) {
     $ver = $law_data->{'現行版本號'};
 }
 
-$ret = LawAPI::searchLawVer(['law_id' => $law_id]);
-Param::addAPI($ret->api_url, "取得 law_id={$law_id} 的版本記錄");
+$ret = LawAPI::searchLawVer(['law_id' => $law_id, 'type' => '三讀']);
+Param::addAPI($ret->api_url, "取得 law_id={$law_id} 的三讀版本記錄");
 $law_vers = $ret->lawver;
 foreach ($law_vers as $law_ver) {
     if ($law_ver->{'法律版本代碼'} == $ver) {
