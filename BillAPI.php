@@ -30,7 +30,12 @@ class BillAPI
     public static function getBillData($billNo)
     {
         $ret = new StdClass;
-        $content = gzdecode(file_get_contents("https://lydata.ronny-s3.click/bill-html/{$billNo}.gz"));
+        if (!$content = file_get_contents("https://lydata.ronny-s3.click/bill-html/{$billNo}.gz")) {
+            throw new Exception("{$billNo} html not found");
+        }
+        if (!$content = gzdecode($content)) {
+            throw new Exception("{$billNo} gunzip failed");
+        }
         $ret->detail = Parser::parseBillDetail($billNo, $content);
 
         $content = gzdecode(file_get_contents("https://lydata.ronny-s3.click/bill-doc-parsed/html/{$billNo}.doc.gz"));
