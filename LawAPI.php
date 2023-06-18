@@ -130,7 +130,7 @@ class LawAPI
         $bill_type = $bill_data->docData->{'立法種類'};
         if ($bill_type == '修正條文') {
             $title = $bill_data->docData->{'對照表標題'};
-            if (preg_match('#(.*法)第.*條條文修正草案對照表#u', $title, $matches)) {
+            if (preg_match('#(.*法)(第.*條|部分)條文修正草案對照表#u', $title, $matches)) {
                 $lawver->{'法律名稱'} = $matches[1];
             } else {
                 throw new Exception("未知的對照表標題: " . $title);
