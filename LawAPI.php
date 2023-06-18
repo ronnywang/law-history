@@ -49,7 +49,7 @@ class LawAPI
                 'term' => ['法律代碼' => $params['law_id']],
             ];
         }
-        if ($params['q']) {
+        if (array_key_exists('q', $params) and $params['q']) {
             $api_params['q'] = $params['q'];
             $cmd['query']['bool']['should'][] = [
                 'match_phrase' => [
@@ -116,7 +116,7 @@ class LawAPI
             $api_params['ver'] = $params['ver'];
             $cmd['query']['bool']['must'][] = ['term' => ['法律版本代碼' => $params['ver']]];
         }
-        if ($params['type']) {
+        if (array_key_exists('type', $params) and $params['type']) {
             $api_params['type'] = $params['type'];
             $cmd['query']['bool']['must'][] = ['term' => ['版本種類' => $params['type']]];
         }
