@@ -98,6 +98,8 @@ return;
                     foreach ($sub_td_doms->item(3)->childNodes as $n) {
                         if ($n->nodeName == '#text') {
                             $record['狀態'] .= trim($n->nodeValue);
+                        } elseif ($n->nodeName == 'a') {
+                            $record['狀態'] .= trim($n->nodeValue);
                         }
                     }
                     $record['狀態'] = preg_replace('/\s+/', ' ', $record['狀態']);
