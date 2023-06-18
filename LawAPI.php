@@ -220,4 +220,50 @@ class LawAPI
         }
         return $records;
     }
+
+    public static $_db_bulk_pool = [];
+
+    public static function dbBulkCommit($mapping = null)
+    {
+        if (is_null($mapping)) {
+            $mappings = array_keys(self::$_db_bulk_pool);
+        } else {
+            $mappings = [$mapping];
+        }
+        foreach ($mappings as $mapping) {
+			$ret = API::query('law', "/{$mapping}/_bulk", 'PUT', self::$_db_bulk_pool[$mapping]);
+            $ids = [];
+            foreach ($ret->items as $command) {
+                foreach ($command as $action => $result) {
+                    if ($result->status == 200 or $result->status == 201) {
+                        $ids[] = $result->_id;
+                        continue;
+                    }
+                    print_r($result);
+                    exit;
+                }
+            }
+
+            error_log(sprintf("bulk commit, update (%d) %s", count($ids), mb_strimwidth(implode(',', $ids), 0, 200)));
+            self::$_db_bulk_pool[$mapping] = '';
+        }
+    }
+
+    public static function dbBulkInsert($mapping, $id, $data)
+    {
+        if (!array_key_exists($mapping, self::$_db_bulk_pool)) {
+            self::$_db_bulk_pool[$mapping] = '';
+        }
+        self::$_db_bulk_pool[$mapping] .=
+            json_encode(array(
+                'update' => array('_id' => $id),
+            )) . "\n"
+            . json_encode(array(
+                'doc' => $data,
+                'doc_as_upsert' => true,
+            )) . "\n";
+        if (strlen(self::$_db_bulk_pool[$mapping]) > 1000000) {
+            self::dbBulkCommit($mapping);
+        }
+    }
 }
