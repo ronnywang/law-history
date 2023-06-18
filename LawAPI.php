@@ -84,6 +84,99 @@ class LawAPI
         return $ret;
     }
 
+    public static function equalStr($a, $b)
+    {
+        $std_str = function($s) {
+            $s = preg_replace('#\s#', '', $s);
+            return $s;
+        };
+        $a = $std_str($a);
+        $b = $std_str($b);
+        return $a == $b;
+    }
+
+    public static function updateBillData($params)
+    {
+        list(, $billNo) = explode('-', $params['ver']);
+
+        $bulk_insert_pool = [];
+
+        try {
+            $bill_data = BillAPI::getBillData($billNo);
+        } catch (Exception $e) {
+            return false;
+        }
+        $bill_type = $bill_data->docData->{'立法種類'};
+        if ($bill_type == '修正條文') {
+            $action = '修正';
+        }
+        $commit_at = date('Ymd', strtotime($bill_data->docData->created_at));
+
+        $ret = LawAPI::searchLaw(['law_id' => $params['law_id']]);
+        if (!$law_data = $ret->data[0]) {
+            return false;
+        }
+        $lawver = new StdClass;
+        $lawver->{'法律代碼'} = $params['law_id'];
+        $lawver->{'版本種類'} = '議案';
+        $lawver->{'法律版本代碼'} = $params['ver'];
+        $lawver->{'前版本代碼'} = null;
+        $lawver->{'日期'} = intval($commit_at);
+        $lawver->{'動作'} = $action;
+        $lawver->{'法律名稱'} = $title;
+        $lawver->{'議案資料'} = $bill_data;
+
+        $title = $bill_data->detail->{'提案單位/提案委員'} . $bill_data->detail->{'議案名稱'};
+        $title = preg_replace('#^本院委員#', '', $title);
+        $title = preg_replace('#，請審議案。$#', '', $title);
+
+        $bill_type = $bill_data->docData->{'立法種類'};
+        if ($bill_type == '修正條文') {
+            foreach ($bill_data->docData->{'修正記錄'} as $record) {
+                list($lineno, $content) = explode('　', $record['現行條文'], 2);
+
+                $ret = LawAPI::searchLawLine(['law_id' => $law_data->{'法律代碼'}, 'line_no' => $lineno]);
+                $lawline = null;
+                foreach (array_reverse($ret->lawline) as $check_lawline) {
+                    if ($check_lawline->{'日期'} > $commit_at) {
+                        continue;
+                    }
+                    if (!self::equalStr($check_lawline->{'內容'}, $content)) {
+                        continue;
+                    }
+
+                    if (is_null($lawver->{'前版本代碼'})) {
+                        $lawver->{'前版本代碼'} = $check_lawline->{'法律版本代碼'};
+                    } elseif ($lawver->{'前版本代碼'} != $check_lawline->{'法律版本代碼'}) {
+                        throw new Exception('版本代碼好像不太一樣？');
+                    }
+                    $lawline = $check_lawline;
+                    unset($check_lawline->_id);
+                    unset($check_lawline->_prev_id);
+                    $lawline->{'法律版本代碼'} = $params['ver'];
+                    $lawline->{'日期'} = intval($commit_at);
+                    $lawline->{'動作'} = $action;
+                    $lawline->{'內容'} = explode('　', $record['修正條文'])[1];
+                    $lawline->{'前法版本'} = $lawline->{'此法版本'};
+                    $lawline->{'此法版本'} = $params['ver'];
+                    $lawline->{'說明'} = $record['說明'];
+					$bulk_insert_pool[] = ['lawline', implode('-', [$lawline->{'法律代碼'}, $lawline->{'法律版本代碼'}, $lawline->{'法條代碼'}]), $lawline];
+					break;
+                }
+                if (is_null($lawline)) {
+                    // TODO: 找不到對應的法律
+                    return false;
+                }
+            }
+        }
+		$bulk_insert_pool[] = ['lawver', implode('-', [$lawver->{'法律代碼'}, $lawver->{'法律版本代碼'}]), $lawver];
+        foreach ($bulk_insert_pool as $bulk_insert) {
+            self::dbBulkInsert($bulk_insert[0], $bulk_insert[1], $bulk_insert[2]);
+        }
+        self::dbBulkCommit();
+        return true;
+    }
+
     public static function searchLawVer($params)
     {
         $api_params = [];
