@@ -46,7 +46,7 @@ foreach ($ret->lawline as $law_line) {
 ?>
 <?php include(__DIR__ . '/header.php'); ?>
 <h1><?= htmlspecialchars($law_data->{'最新名稱'}) ?></h1>
-<h2><?= htmlspecialchars($ver) ?>版本法案對照表</h2>
+<h2><?= htmlspecialchars($current_law_ver->{'版本名稱'}) ?>版本法案對照表</h2>
 <div class="row">
     <div class="col-md-3">
         <div class="panel panel-default">

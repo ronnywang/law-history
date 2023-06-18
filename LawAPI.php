@@ -235,8 +235,9 @@ class LawAPI
         foreach ($obj->hits->hits as $hit) {
             $record = $hit->_source;
             $record->_id = $hit->_id;
+            $record->{'版本名稱'} = $record->{'法律版本代碼'};
             if (property_exists($record, '議案資料')) {
-                $record->title = BillAPI::getBillName(
+                $record->{'版本名稱'} = BillAPI::getBillName(
                     $record->{'議案資料'}->detail->{'提案單位/提案委員'},
                     $record->{'議案資料'}->detail->{'議案名稱'},
                     $record->{'法律名稱'}
