@@ -78,6 +78,7 @@ class LawAPI
         $ret->api_url = self::getAPIURL('/api/law', $api_params);
         foreach ($obj->hits->hits as $hit) {
             $record = $hit->_source;
+            $record->_id = $hit->_id;
             $records[] = $record;
         }
         $ret->data = $records;
@@ -231,6 +232,7 @@ class LawAPI
 
         foreach ($obj->hits->hits as $hit) {
             $record = $hit->_source;
+            $record->_id = $hit->_id;
             if (property_exists($record, '修訂歷程')) {
                 foreach ($record->{'修訂歷程'} as $idx1 => $data) {
                     if (!property_exists($data, '關係文書')) {
