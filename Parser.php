@@ -246,8 +246,9 @@ return;
             } else if (strpos(trim($p_dom->nodeValue), '連署人：') === 0) {
                 $record->{'連署人'} = preg_replace('/^連署人：/u', '', trim($p_dom->nodeValue));
             } else if (in_array(self::onlystr($p_dom->nodeValue), array('修正條文', '增訂條文', '條文', '審查會通過條文', '審查會通過', '審查會條文'))) {
+                $record2 = new StdClass;
                 if (in_array(self::onlystr($p_dom->nodeValue), array('審查會通過', '審查會條文', '審查會通過條文'))) {
-                    $record->{'立法種類'} = '審查會版本';
+                    $record2->{'立法種類'} = '審查會版本';
                     // TODO: 審查會通過條文 (處理多筆字號)
                     unset($record->{'字號'});
                 }
@@ -262,17 +263,17 @@ return;
                 }
 
                 // 如果是審查會通過版本，標題頭可能會在另一個 table ，因此需要往上抓
-                if ($record->{'立法種類'} == '審查會版本') {
+                if ($record2->{'立法種類'} == '審查會版本') {
                     $title_table_dom = $table_dom;
                     while ($title_table_dom = $title_table_dom->previousSibling) {
                         if ($title_table_dom->nodeName == 'table' and preg_match('#條文對照表$#', trim($title_table_dom->nodeValue))) {
-                            $record->{'對照表標題'} = preg_replace('#\s+#', '', $title_table_dom->nodeValue);
-                            $record->{'對照表標題'} = str_replace('」', '', $record->{'對照表標題'});
+                            $record2->{'對照表標題'} = preg_replace('#\s+#', '', $title_table_dom->nodeValue);
+                            $record2->{'對照表標題'} = str_replace('」', '', $record2->{'對照表標題'});
                             break;
                         }
                     }
                 }
-                $record->{'修正記錄'} = array();
+                $record2->{'修正記錄'} = array();
                 $tr_doms = array();
                 foreach ($table_dom->childNodes as $tbody_dom) {
                     if ('tbody' == $tbody_dom->nodeName) {
@@ -289,11 +290,13 @@ return;
                 $columns = array();
                 while ($tr_dom = array_shift($tr_doms)) {
                     $td_doms = array();
+                    $all_td_doms = [];
                     $only_first = true;
                     foreach ($tr_dom->childNodes as $td_dom) {
                         if ('td' != $td_dom->nodeName) {
                             continue;
                         }
+                        $all_td_doms[] = $td_dom;
                         if (!count($td_doms) and trim($td_dom->nodeValue) == '') {
                             continue;
                         }
@@ -312,7 +315,7 @@ return;
                         continue;
                     }
                     if ($only_first) {
-                        $record->{'對照表標題'} = self::onlystr($td_doms[0]->nodeValue);
+                        $record2->{'對照表標題'} = self::onlystr($td_doms[0]->nodeValue);
                     } else if (in_array(self::onlystr($td_doms[0]->nodeValue), array('審查會通過條文', '審查會通過', '審查會條文'))) {
                         // TODO: 審查會通過條文 (處理多筆字號)
                         unset($record->{'字號'});
@@ -325,7 +328,7 @@ return;
                                 $columns['說明'] = $idx;
                             }
                         }
-                        $record->{'立法種類'} = '審查會版本';
+                        $record2->{'立法種類'} = '審查會版本';
                         if (!array_key_exists('審查會通過條文', $columns) or !array_key_exists('說明', $columns)) {
                             throw new Exception("找不到審查會通過條文和說明欄位");
                             //echo $doc->saveHTML($tr_dom);
@@ -333,23 +336,23 @@ return;
                             //exit;
                         }
                     } else if (count($td_doms) >= 2 and trim($td_doms[0]->nodeValue) == '修正條文') {
-                        $record->{'立法種類'} = '修正條文';
+                        $record2->{'立法種類'} = '修正條文';
                     } else if (count($td_doms) == 2 and self::onlystr($td_doms[0]->nodeValue) == '增訂條文') {
-                        $record->{'立法種類'} = '增訂條文';
+                        $record2->{'立法種類'} = '增訂條文';
                     } else if (count($td_doms) == 3 and self::onlystr($td_doms[0]->nodeValue) == '條文' and trim($td_doms[1]->nodeValue) == '現行條文') {
-                        $record->{'立法種類'} = '修正條文';
+                        $record2->{'立法種類'} = '修正條文';
                     } else if (count($td_doms) == 3 and self::onlystr($td_doms[0]->nodeValue) == '條文' and self::onlystr($td_doms[1]->nodeValue) == '參考條文' and self::onlystr($td_doms[2]->nodeValue) == '說明') {
-                        $record->{'立法種類'} = '制定條文';
+                        $record2->{'立法種類'} = '制定條文';
                         $columns['條文'] = 0;
                         $columns['說明'] = 2;
                     } else if (count($td_doms) == 2 and self::onlystr($td_doms[0]->nodeValue) == '條文') {
-                        $record->{'立法種類'} = '制定條文';
+                        $record2->{'立法種類'} = '制定條文';
                         $columns['條文'] = 0;
                         $columns['說明'] = 1;
                     } else if (count($td_doms) == 3 and trim($td_doms[0]->nodeValue) == '修正名稱') {
                         $tr_dom = array_shift($tr_doms);
                         $td_doms = $tr_dom->getElementsByTagName('td');
-                        $record->{'名稱修正'} = array(
+                        $record2->{'名稱修正'} = array(
                             '修正名稱' => trim($td_doms->item(0)->nodeValue),
                             '現行名稱' => trim($td_doms->item(1)->nodeValue),
                             '說明' => str_replace("\t", "", trim($td_doms->item(2)->nodeValue)),
@@ -358,31 +361,38 @@ return;
                     } else if (count($td_doms) == 2 and in_array(trim($td_doms[0]->nodeValue), array('名稱', '法案名稱'))) {
                         $tr_dom = array_shift($tr_doms);
                         $td_doms = $tr_dom->getElementsByTagName('td');
-                        $record->{'名稱說明'} = str_replace("\t", "", trim($td_doms->item(1)->nodeValue));
-                    } else if ('審查會版本' == $record->{'立法種類'}) {
-                        $record->{'修正記錄'}[] = array(
-                            '修正條文' => str_replace("\t", "", trim($td_doms[$columns['審查會通過條文']]->nodeValue)),
-                            '現行條文' => array_key_exists('現行條文', $columns) ? str_replace("\t", "", trim($td_doms[$columns['現行條文']]->nodeValue)) : '',
-                            '說明' => str_replace("\t", "", trim($td_doms[$columns['說明']]->nodeValue)),
+                        $record2->{'名稱說明'} = str_replace("\t", "", trim($td_doms->item(1)->nodeValue));
+                    } else if ('審查會版本' == $record2->{'立法種類'}) {
+                        if (!array_key_exists('現行條文', $columns)) {
+                            $record2->{'修正記錄'}[] = array(
+                                '增訂條文' => str_replace("\t", "", trim($td_doms[$columns['審查會通過條文']]->nodeValue)),
+                                '說明' => str_replace("\t", "", trim($td_doms[$columns['說明']]->nodeValue)),
+                            );
+                        } else {
+                            $record2->{'修正記錄'}[] = array(
+                                '修正條文' => str_replace("\t", "", trim($td_doms[$columns['審查會通過條文']]->nodeValue)),
+                                '現行條文' => str_replace("\t", "", trim($td_doms[$columns['現行條文']]->nodeValue)),
+                                '說明' => str_replace("\t", "", trim($td_doms[$columns['說明']]->nodeValue)),
+                            );
+                        }
+                    } else if ('修正條文' == $record2->{'立法種類'}) { // and $td_doms->length == 3) {
+                        $record2->{'修正記錄'}[] = array(
+                            '修正條文' => str_replace("\t", "", trim($all_td_doms[0]->nodeValue)),
+                            '現行條文' => str_replace("\t", "", trim($all_td_doms[1]->nodeValue)),
+                            '說明' => str_replace("\t", "", trim($all_td_doms[2]->nodeValue)),
                         );
-                    } else if ('修正條文' == $record->{'立法種類'}) { // and $td_doms->length == 3) {
-                        $record->{'修正記錄'}[] = array(
-                            '修正條文' => str_replace("\t", "", trim($td_doms[0]->nodeValue)),
-                            '現行條文' => str_replace("\t", "", trim($td_doms[1]->nodeValue)),
-                            '說明' => str_replace("\t", "", trim($td_doms[2]->nodeValue)),
-                        );
-                    } else if ('增訂條文' == $record->{'立法種類'} and count($td_doms) == 2) {
-                        $record->{'修正記錄'}[] = array(
+                    } else if ('增訂條文' == $record2->{'立法種類'} and count($td_doms) == 2) {
+                        $record2->{'修正記錄'}[] = array(
                             '增訂條文' => str_replace("\t", "", trim($td_doms[0]->nodeValue)),
                             '說明' => str_replace("\t", "", trim($td_doms[1]->nodeValue)),
                         );
-                    } else if ('制定條文' == $record->{'立法種類'}) {
-                        $record->{'修正記錄'}[] = array(
-                            '條文' => str_replace("\t", "", trim($td_doms[$columns['條文']]->nodeValue)),
+                    } else if ('制定條文' == $record2->{'立法種類'}) {
+                        $record2->{'修正記錄'}[] = array(
+                            '增訂條文' => str_replace("\t", "", trim($td_doms[$columns['條文']]->nodeValue)),
                             '說明' => str_replace("\t", "", trim($td_doms[$columns['說明']]->nodeValue)),
                         );
                     } else {
-                        if ($record->{'立法種類'} == '審查會版本') {
+                        if ($record2->{'立法種類'} == '審查會版本') {
                            // == '1070321070300100') {
                             continue;
                         }
@@ -393,6 +403,15 @@ return;
                         exit;
                     }
                 }
+                if ($record2->{'立法種類'} == '審查會版本') {
+                    if (array_key_exists('現行條文', $columns)) {
+                        $record2->{'立法種類'} = '修正條文';
+                    } else {
+                        $record2->{'立法種類'} = '增訂條文';
+                    }
+
+                }
+                $record->{'對照表'}[] = $record2;
             }
         }
 

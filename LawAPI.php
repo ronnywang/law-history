@@ -89,6 +89,7 @@ class LawAPI
     {
         $std_str = function($s) {
             $s = preg_replace('#\s#', '', $s);
+            $s = str_replace('。', '', $s);
             return $s;
         };
         $a = $std_str($a);
@@ -127,25 +128,61 @@ class LawAPI
         $lawver->{'法律名稱'} = '';
         $lawver->{'議案資料'} = $bill_data;
 
-        $bill_type = $bill_data->docData->{'立法種類'};
-        if ($bill_type == '修正條文' or $bill_type == '審查會版本') {
-            $title = $bill_data->docData->{'對照表標題'};
-            if (preg_match('#(.*法)(第.*條|部分).*條文修正草案(條文)?對照表#u', $title, $matches)) {
-                $lawver->{'法律名稱'} = $matches[1];
+        $table = null;
+        foreach ($bill_data->docData->{'對照表'} as $check_table) {
+            if (preg_match('#「?(.*法)(第.*條|部分).*條文修正草案(條文)?對照表#u', $check_table->{'對照表標題'}, $matches)) {
+                $lawname = $matches[1];
+            } elseif (preg_match('#「(.*)草案」條文對照表#', $check_table->{'對照表標題'}, $matches)) {
+                $lawname = $matches[1];
+            } elseif (preg_match('#(.*)修正草案條文對照表#', $check_table->{'對照表標題'}, $matches)) {
+                $lawname = $matches[1];
             } else {
-                throw new Exception("未知的對照表標題: " . $title);
+                throw new Exception("未知的對照表標題: " . $check_table->{'對照表標題'});
             }
-            foreach ($bill_data->docData->{'修正記錄'} as $record) {
+            $lawname = preg_replace('#修正$#', '', $lawname);
+            if ($lawname == $law_data->{'最新名稱'} or in_array($lawname, $law_data->{'其他名稱'})) {
+                $table = $check_table;
+                break;
+            }
+        }
+
+        if (is_null($table)) {
+            throw new Exception("找不到 {$law_data->{'最新名稱'}} 的對照表");
+        }
+        $seq = 1;
+        if ($table->{'立法種類'}) {
+            foreach ($table->{'修正記錄'} as $record) {
+                $record['修正條文'] = preg_replace('#^（[^）]+）\s*#', '', $record['修正條文']);
+                if ($record['現行條文'] == '') {
+                    $rule_no = explode('　', $record['修正條文'], 2)[0];
+                    $lawline = new StdClass;
+                    $lawline->{'法律代碼'} = $params['law_id'];
+                    $lawline->{'法律版本代碼'} = $params['ver'];
+                    $lawline->{'法條代碼'} = "{$commit_at}-{$rule_no}";
+                    $lawline->{'順序'} = $seq ++;
+                    $lawline->{'條號'} = $rule_no;
+                    $lawline->{'母層級'} = '';
+                    $lawline->{'日期'} = intval($commit_at);
+                    $lawline->{'動作'} = '增訂';
+                    $lawline->{'內容'} = explode('　', $record['修正條文'], 2)[1];
+                    $lawline->{'前法版本'} = '';
+                    $lawline->{'此法版本'} = $params['ver'];
+                    $lawline->{'說明'} = $record['說明'];
+                    $bulk_insert_pool[] = ['lawline', implode('-', [$lawline->{'法律代碼'}, $lawline->{'法律版本代碼'}, $lawline->{'法條代碼'}]), $lawline];
+                    continue;
+                }
                 list($lineno, $content) = explode('　', $record['現行條文'], 2);
 
                 $ret = LawAPI::searchLawLine(['law_id' => $law_data->{'法律代碼'}, 'line_no' => $lineno]);
                 $lawline = null;
+                $miss_content = [];
                 foreach (array_reverse($ret->lawline) as $check_lawline) {
                     if ($check_lawline->{'日期'} > $commit_at) {
                         continue;
                     }
                     if (!self::equalStr($check_lawline->{'內容'}, $content)) {
-                        continue;
+                        $miss_content[] = [$check_lawline->{'日期'}, $check_lawline->{'內容'}];
+                        //continue;
                     }
 
                     if (is_null($lawver->{'前版本代碼'})) {
@@ -157,9 +194,16 @@ class LawAPI
                     unset($check_lawline->_id);
                     unset($check_lawline->_prev_id);
                     $lawline->{'法律版本代碼'} = $params['ver'];
+                    $lawline->{'順序'} = $seq ++;
                     $lawline->{'日期'} = intval($commit_at);
-                    $lawline->{'動作'} = $action;
-                    $lawline->{'內容'} = explode('　', $record['修正條文'])[1];
+                    $lawline->{'條號'} = explode('　', $record['修正條文'], 2)[0];
+                    if (!explode('　', $record['修正條文'])[1]) {
+                        $lawline->{'動作'} = '刪除';
+                        $lawline->{'內容'} = '';
+                    } else {
+                        $lawline->{'動作'} = '修正';
+                        $lawline->{'內容'} = explode('　', $record['修正條文'])[1];
+                    }
                     $lawline->{'前法版本'} = $lawline->{'此法版本'};
                     $lawline->{'此法版本'} = $params['ver'];
                     $lawline->{'說明'} = $record['說明'];
@@ -167,13 +211,17 @@ class LawAPI
 					break;
                 }
                 if (is_null($lawline)) {
+                    echo json_encode([
+                        $record, $miss_content
+                    ]);
+                    exit;
                     throw new Exception("找不到 {$content}");
                 }
             }
         } else {
             throw new Exception("未支援立法種類: {$bill_type}");
         }
-		$bulk_insert_pool[] = ['lawver', implode('-', [$lawver->{'法律代碼'}, $lawver->{'法律版本代碼'}]), $lawver];
+        $bulk_insert_pool[] = ['lawver', implode('-', [$lawver->{'法律代碼'}, $lawver->{'法律版本代碼'}]), $lawver];
         foreach ($bulk_insert_pool as $bulk_insert) {
             self::dbBulkInsert($bulk_insert[0], $bulk_insert[1], $bulk_insert[2]);
         }
@@ -392,6 +440,7 @@ class LawAPI
             }
 
             error_log(sprintf("bulk commit, update (%d) %s", count($ids), mb_strimwidth(implode(',', $ids), 0, 200)));
+            API::query('law', "/_flush", "POST", '');
             self::$_db_bulk_pool[$mapping] = '';
         }
     }
