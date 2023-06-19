@@ -5,6 +5,7 @@
         <ul>
             <?php foreach (Param::getAPIs() as $url_reason) { ?>
             <li>
+            <a href="<?= htmlspecialchars($url_reason[0]) ?>" target="_blank"><span class="glyphicon glyphicon-link" aria-hidden="true"></span></a>
             <?= htmlspecialchars($url_reason[1]) ?>: <input type="text" style="width: 300px" readonly="readonly" value="<?= htmlspecialchars($url_reason[0]) ?>">
             </li>
             <?php } ?>
