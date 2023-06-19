@@ -20,11 +20,12 @@ if (strpos($ver, 'bill-') === 0) {
 
 $ret = LawAPI::searchLawVer(['law_id' => $law_id, 'type' => '三讀']);
 Param::addAPI($ret->api_url, "取得 law_id={$law_id} 的三讀版本記錄");
-$law_vers = $ret->lawver;
-foreach ($law_vers as $law_ver) {
+$law_vers = [];
+foreach ($ret->lawver as $law_ver) {
     if ($law_ver->{'法律版本代碼'} == $ver) {
         $current_law_ver = $law_ver;
     }
+    $law_vers[$law_ver->{'法律版本代碼'}] = $law_ver;
 }
 $ret = LawAPI::searchLawLine(['law_id' => $law_id, 'ver' => $ver]);
 Param::addAPI($ret->api_url, "取得 law_id={$law_id}, ver={$ver} 的條文記錄");
@@ -71,8 +72,10 @@ foreach ($ret->lawline as $law_line) {
                     <a class ="list-group-item <?= $rel_bill->billNo == $current_law_ver->{'議案資料'}->detail->billNo ? ' active' : '' ?>" href="/lawdiff/<?= $law_data->{'法律代碼'} ?>/bill-<?= urlencode($rel_bill->billNo) ?>"><?= htmlspecialchars($rel_bill->title) ?></a>
                     <?php } ?>
 
-                    <?php if ($current_law_ver->{'三讀日期'}) { ?>
-                    <a class="list-group-item" href="/law/<?= $law_data->{'法律代碼'} ?>/<?= urlencode($current_law_ver->{'三讀日期'} . '-三讀') ?>">[後版本] <?= htmlspecialchars($current_law_ver->{'三讀日期'} . '-三讀') ?></a>
+                    <?php foreach ($current_law_ver->{'三讀日期'} as $date) { ?>
+                    <?php if (array_key_exists("{$date}-三讀", $law_vers)) { ?>
+                    <a class="list-group-item" href="/law/<?= $law_data->{'法律代碼'} ?>/<?= urlencode("{$date}-三讀") ?>">[後版本] <?= htmlspecialchars("{$date}-三讀") ?></a>
+                    <?php } ?>
                     <?php } ?>
                 </div>
             </div>
