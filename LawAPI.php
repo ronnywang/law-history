@@ -42,6 +42,7 @@ class LawAPI
             ],
             'size' => $limit,
             'from' => $limit * $page - $limit,
+            'sort' => ['更新日期' => 'desc'],
         ];
         if ($params['law_id']) {
             $api_params['law_id'] = $params['law_id'];
