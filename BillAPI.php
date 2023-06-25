@@ -70,19 +70,29 @@ class BillAPI
 
     public static function getBillName($proposal, $title, $lawname = '')
     {
+        if (!$proposal) {
+            $proposal = $title;
+        }
         $proposal = preg_replace('#^本院委員#', '', $proposal);
         $proposal = preg_replace('#^本院#', '', $proposal);
+        $proposal = preg_replace('#「.*$#', '', $proposal);
         $proposal = preg_replace('#等\d+人$#', '', $proposal);
+        $proposal = preg_replace('#報告併案審查.*$#', '', $proposal);
+        if (strpos($title, '報告併案審查') !== false ) {
+            $title = '報告併案審查';
+        }
         if (preg_match('#「(.*)」，請審議案。$#u', $title, $matches)) {
             $title = $matches[1];
+        } elseif (preg_match('#「(.*)」案。#', $title, $matches)) {
+            $title = $matches[1];
+        }
+        if (strpos($proposal, '考試院') === 0) {
+            $proposal = '考試院';
         }
         if ($lawname) {
             if (strpos($title, $lawname) === 0) {
                 $title = substr($title, strlen($lawname));
             }
-        }
-        if (strpos($title, '報告併案審查') === 0) {
-            $title = '報告併案審查';
         }
         $title = preg_replace('#條文修正草案$#', '', $title);
         if ($title == '部分') {
