@@ -10,6 +10,7 @@ Param::addAPI($ret->api_url, "取得本頁法律列表資料");
 <ul>
     <li>
     <h3><a href="/law/<?= $law_data->{'法律代碼'} ?>"><?= htmlspecialchars($law_data->{'最新名稱'}) ?></a></h3>
+    更新日期: <?= htmlspecialchars($law_data->{'更新日期'}) ?>
     </li>
 </ul>
 <?php } ?>
