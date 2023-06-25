@@ -151,6 +151,7 @@ class LawAPI
                 break;
             }
         }
+        $lawver->{'法律名稱'} = $lawname;
 
         if (is_null($table)) {
             throw new Exception("找不到 {$law_data->{'最新名稱'}} 的對照表");
@@ -158,9 +159,16 @@ class LawAPI
         $seq = 1;
         if ($table->{'立法種類'}) {
             foreach ($table->{'修正記錄'} as $record) {
-                $record['修正條文'] = preg_replace('#^（[^）]+）\s*#', '', $record['修正條文']);
+                if (array_key_exists('修正條文', $record)) {
+                    $law_content = $record['修正條文'];
+                } elseif (array_key_exists('增訂條文', $record)) {
+                    $law_content = $record['增訂條文'];
+                } else {
+                    throw new Exception("找不到修正條文或增訂條文");
+                }
+                $law_content = preg_replace('#^（[^）]+）\s*#', '', $law_content);
                 if ($record['現行條文'] == '') {
-                    $rule_no = explode('　', $record['修正條文'], 2)[0];
+                    $rule_no = explode('　', $law_content, 2)[0];
                     $lawline = new StdClass;
                     $lawline->{'法律代碼'} = $params['law_id'];
                     $lawline->{'法律版本代碼'} = $params['ver'];
@@ -170,7 +178,7 @@ class LawAPI
                     $lawline->{'母層級'} = '';
                     $lawline->{'日期'} = intval($commit_at);
                     $lawline->{'動作'} = '增訂';
-                    $lawline->{'內容'} = explode('　', $record['修正條文'], 2)[1];
+                    $lawline->{'內容'} = explode('　', $law_content, 2)[1];
                     $lawline->{'前法版本'} = '';
                     $lawline->{'此法版本'} = $params['ver'];
                     $lawline->{'說明'} = $record['說明'];
@@ -202,13 +210,13 @@ class LawAPI
                     $lawline->{'法律版本代碼'} = $params['ver'];
                     $lawline->{'順序'} = $seq ++;
                     $lawline->{'日期'} = intval($commit_at);
-                    $lawline->{'條號'} = explode('　', $record['修正條文'], 2)[0];
-                    if (!explode('　', $record['修正條文'])[1]) {
+                    $lawline->{'條號'} = explode('　', $law_content, 2)[0];
+                    if (!explode('　', $law_content)[1]) {
                         $lawline->{'動作'} = '刪除';
                         $lawline->{'內容'} = '';
                     } else {
                         $lawline->{'動作'} = '修正';
-                        $lawline->{'內容'} = explode('　', $record['修正條文'])[1];
+                        $lawline->{'內容'} = explode('　', $law_content)[1];
                     }
                     $lawline->{'前法版本'} = $lawline->{'此法版本'};
                     $lawline->{'此法版本'} = $params['ver'];
