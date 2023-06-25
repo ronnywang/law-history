@@ -46,7 +46,12 @@ class BillAPI
         if ($content) {
             $obj = json_decode($content);
             $content = (base64_decode($obj->content));
-            $ret->docData = Parser::parseBillDoc($billNo, $content);
+            try {
+                $ret->docData = Parser::parseBillDoc($billNo, $content);
+            } catch (Exception $e) {
+                $ret->docData = '';
+                $ret->doc_error = $e->getMessage();
+            }
         }
         return $ret;
     }
