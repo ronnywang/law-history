@@ -76,8 +76,10 @@ class BillAPI
         if (preg_match('#「(.*)」，請審議案。$#u', $title, $matches)) {
             $title = $matches[1];
         }
-        if (strpos($title, $lawname) === 0) {
-            $title = substr($title, strlen($lawname));
+        if ($lawname) {
+            if (strpos($title, $lawname) === 0) {
+                $title = substr($title, strlen($lawname));
+            }
         }
         if (strpos($title, '報告併案審查') === 0) {
             $title = '報告併案審查';

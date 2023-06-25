@@ -72,10 +72,13 @@ foreach ($ret->lawline as $law_line) {
                     <a class ="list-group-item <?= $rel_bill->billNo == $current_law_ver->{'議案資料'}->detail->billNo ? ' active' : '' ?>" href="/lawdiff/<?= $law_data->{'法律代碼'} ?>/bill-<?= urlencode($rel_bill->billNo) ?>"><?= htmlspecialchars($rel_bill->title) ?></a>
                     <?php } ?>
 
+                    <?php if (property_exists($current_law_ver, '三讀日期') and is_array($current_law_ver->{'三讀日期'})) { ?>
                     <?php foreach ($current_law_ver->{'三讀日期'} as $date) { ?>
                     <?php if (array_key_exists("{$date}-三讀", $law_vers)) { ?>
                     <a class="list-group-item" href="/law/<?= $law_data->{'法律代碼'} ?>/<?= urlencode("{$date}-三讀") ?>">[後版本] <?= htmlspecialchars("{$date}-三讀") ?></a>
                     <?php } ?>
+                    <?php } ?>
+
                     <?php } ?>
                 </div>
             </div>

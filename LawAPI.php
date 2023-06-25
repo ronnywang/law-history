@@ -293,7 +293,11 @@ class LawAPI
             $record = $hit->_source;
             $record->_id = $hit->_id;
             $record->{'版本名稱'} = $record->{'法律版本代碼'};
+
             if (property_exists($record, '議案資料')) {
+                if (!property_exists($record->{'議案資料'}->detail, '關連議案')) {
+                    $record->{'議案資料'}->detail->{'關連議案'} = [];
+                }
                 if (property_exists($record->{'議案資料'}->detail, '提案單位/提案委員')) {
                     $proposal = $record->{'議案資料'}->detail->{'提案單位/提案委員'};
                 } elseif (property_exists($record->{'議案資料'}->detail, '審查委員會')) {
@@ -313,7 +317,7 @@ class LawAPI
                 );
                 foreach ($record->{'議案資料'}->detail->{'關連議案'} as $idx => $bill) {
                     $record->{'議案資料'}->detail->{'關連議案'}[$idx]->title = BillAPI::getBillName(
-                        $bill->{'提案人'},
+                        property_exists($bill, '提案人') ? $bill->{'提案人'} : '',
                         $bill->{'議案名稱'},
                         $record->{'法律名稱'}
                     );
@@ -324,11 +328,11 @@ class LawAPI
                 $bill->{'議案名稱'} = $record->{'議案資料'}->detail->{'議案名稱'};
                 $bill->title = $record->{'版本名稱'};
                 $record->{'議案資料'}->detail->{'關連議案'}[] = $bill;
-            }
 
-            usort($record->{'議案資料'}->detail->{'關連議案'}, function($a, $b) {
-                return strcmp($a->billNo, $b->billNo);
-            });
+                usort($record->{'議案資料'}->detail->{'關連議案'}, function($a, $b) {
+                    return strcmp($a->billNo, $b->billNo);
+                });
+            }
 
             if (property_exists($record, '修訂歷程')) {
                 foreach ($record->{'修訂歷程'} as $idx1 => $data) {
