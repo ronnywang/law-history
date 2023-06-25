@@ -135,8 +135,11 @@ class LawAPI
                 $lawname = $matches[1];
             } elseif (preg_match('#「(.*)草案」條文對照表#', $check_table->{'對照表標題'}, $matches)) {
                 $lawname = $matches[1];
+            } elseif (preg_match('#(.*)(第.*條)修正草案條文對照表$#', $check_table->{'對照表標題'}, $matches)) {
+                $lawname = $matches[1];
             } elseif (preg_match('#(.*)修正草案條文對照表#', $check_table->{'對照表標題'}, $matches)) {
                 $lawname = $matches[1];
+
             } elseif (preg_match('#(.*)增訂(.*)條文草案#', $check_table->{'對照表標題'}, $matches)) {
                 $lawname = $matches[1];
             } else {
