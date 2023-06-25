@@ -79,6 +79,13 @@ class LawAPI
         $ret->api_url = self::getAPIURL('/api/law', $api_params);
         foreach ($obj->hits->hits as $hit) {
             $record = $hit->_source;
+            $record->{'連結'} = [];
+            if (property_exists($record, '立法院代碼')) {
+                $record->{'連結'}[] = [
+                    '立法院法律系統',
+                    'https://www.ly.gov.tw/Pages/ashx/LawRedirect.ashx?CODE=' . urlencode($record->{'立法院代碼'}),
+                ];
+            }
             $record->_id = $hit->_id;
             $records[] = $record;
         }
@@ -304,6 +311,7 @@ class LawAPI
             $record = $hit->_source;
             $record->_id = $hit->_id;
             $record->{'版本名稱'} = $record->{'法律版本代碼'};
+            $record->{'連結'} = [];
 
             if (property_exists($record, '議案資料')) {
                 if (!property_exists($record->{'議案資料'}->detail, '關連議案')) {
@@ -335,6 +343,10 @@ class LawAPI
                 }
                 $bill = new StdClass;
                 $bill->billNo = $record->{'議案資料'}->detail->billNo;
+                $record->{'連結'}[] = [
+                    '立法院議事系統',
+                    "https://ppg.ly.gov.tw/ppg/bills/{$bill->billNo}/details",
+                ];
                 $bill->{'提案人'} = $record->{'議案資料'}->detail->{'提案單位/提案委員'};
                 $bill->{'議案名稱'} = $record->{'議案資料'}->detail->{'議案名稱'};
                 $bill->title = $record->{'版本名稱'};

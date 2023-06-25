@@ -33,11 +33,11 @@ $law_lines = $ret->lawline;
 ?>
 <?php include(__DIR__ . '/header.php'); ?>
 <h1><?= htmlspecialchars($law_data->{'最新名稱'}) ?></h1>
-<?php if (property_exists($law_data, '立法院代碼')) { ?>
 <div style="float: right">
-    <a class="btn btn-info" href="https://www.ly.gov.tw/Pages/ashx/LawRedirect.ashx?CODE=<?= urlencode($law_data->{'立法院代碼'}) ?>" target="_blank">立法院法律系統 <span class="glyphicon glyphicon-link" aria-hidden="true"></span></a>
+    <?php foreach (array_merge($law_data->{'連結'}, $current_law_ver->{'連結'}) as $link) { ?>
+    <a class="btn btn-info" href="<?= htmlspecialchars($link[1]) ?>" target="_blank"><?= htmlspecialchars($link[0]) ?> <span class="glyphicon glyphicon-link" aria-hidden="true"></span></a>
+    <?php } ?>
 </div>
-<?php } ?>
 <h2><?= htmlspecialchars($current_law_ver->{'版本名稱'}) ?>版本全文</h2>
 <div class="row">
     <div class="col-md-3">
