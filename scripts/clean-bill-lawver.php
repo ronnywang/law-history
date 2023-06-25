@@ -10,6 +10,7 @@ foreach ($ret->lawver as $d) {
 
 $ret = API::query('law', '/lawline/_search', 'POST', json_encode([
     'query' => ['prefix' => ['法律版本代碼' => 'bill-']],
+    'size' => 100,
 ]));
 foreach ($ret->hits->hits as $hit) {
     $obj = API::query('law', '/lawline/' . urlencode($hit->_id), 'DELETE', '');
