@@ -57,4 +57,8 @@ if ($uri == '/' or $uri == '') {
 } elseif ($uri == '/bill') {
     include(__DIR__ . '/page/bill.php');
     exit;
+} else if (preg_match('#^/bill/detail/([^/]*)#', $uri, $matches)) {
+    Param::set('bill_id', $matches[1]);
+    include(__DIR__ . '/page/billdetail.php');
+    exit;
 }
