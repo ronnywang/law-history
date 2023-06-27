@@ -63,6 +63,15 @@ class LawAPI
                 ]
             ];
         }
+        if (array_key_exists('names', $params) and $params['names']) {
+            $api_params['names'] = $params['names'];
+            $cmd['query'] = [
+                'match_phrase' => 
+                [
+                    '最新名稱' => $params['names'][0],
+                ],
+            ];
+        }
         try {
             $obj = API::query('law', '/law/_search', 'GET', json_encode($cmd));
         } catch (Exception $e) {
@@ -138,21 +147,7 @@ class LawAPI
 
         $table = null;
         foreach ($bill_data->docData->{'對照表'} as $check_table) {
-            if (preg_match('#「?(.*法)(第.*條|部分).*條文修正草案(條文)?對照表#u', $check_table->{'對照表標題'}, $matches)) {
-                $lawname = $matches[1];
-            } elseif (preg_match('#「(.*)草案」條文對照表#', $check_table->{'對照表標題'}, $matches)) {
-                $lawname = $matches[1];
-            } elseif (preg_match('#(.*)(第.*條)修正草案條文對照表$#', $check_table->{'對照表標題'}, $matches)) {
-                $lawname = $matches[1];
-            } elseif (preg_match('#(.*)修正草案條文對照表#', $check_table->{'對照表標題'}, $matches)) {
-                $lawname = $matches[1];
-
-            } elseif (preg_match('#(.*)增訂(.*)條文草案#', $check_table->{'對照表標題'}, $matches)) {
-                $lawname = $matches[1];
-            } else {
-                throw new Exception("未知的對照表標題: " . $check_table->{'對照表標題'});
-            }
-            $lawname = preg_replace('#修正$#', '', $lawname);
+            $lawname = BillAPI::getLawNameFromTableName($check_table->{'對照表標題'});
             if ($lawname == $law_data->{'最新名稱'} or in_array($lawname, $law_data->{'其他名稱'})) {
                 $table = $check_table;
                 break;
@@ -166,15 +161,15 @@ class LawAPI
         $seq = 1;
         if ($table->{'立法種類'}) {
             foreach ($table->{'修正記錄'} as $record) {
-                if (array_key_exists('修正條文', $record)) {
-                    $law_content = $record['修正條文'];
-                } elseif (array_key_exists('增訂條文', $record)) {
-                    $law_content = $record['增訂條文'];
+                if (property_exists($record, '修正條文')) {
+                    $law_content = $record->{'修正條文'};
+                } elseif (property_exists($record, '增訂條文')) {
+                    $law_content = $record->{'增訂條文'};
                 } else {
                     throw new Exception("找不到修正條文或增訂條文");
                 }
                 $law_content = preg_replace('#^（[^）]+）\s*#', '', $law_content);
-                if ($record['現行條文'] == '') {
+                if ($record->{'現行條文'} == '') {
                     $rule_no = explode('　', $law_content, 2)[0];
                     $lawline = new StdClass;
                     $lawline->{'法律代碼'} = $params['law_id'];
@@ -188,11 +183,11 @@ class LawAPI
                     $lawline->{'內容'} = explode('　', $law_content, 2)[1];
                     $lawline->{'前法版本'} = '';
                     $lawline->{'此法版本'} = $params['ver'];
-                    $lawline->{'說明'} = $record['說明'];
+                    $lawline->{'說明'} = $record->{'說明'};
                     $bulk_insert_pool[] = ['lawline', implode('-', [$lawline->{'法律代碼'}, $lawline->{'法律版本代碼'}, $lawline->{'法條代碼'}]), $lawline];
                     continue;
                 }
-                list($lineno, $content) = explode('　', $record['現行條文'], 2);
+                list($lineno, $content) = explode('　', $record->{'現行條文'}, 2);
 
                 $ret = LawAPI::searchLawLine(['law_id' => $law_data->{'法律代碼'}, 'line_no' => $lineno]);
                 $lawline = null;
@@ -227,7 +222,7 @@ class LawAPI
                     }
                     $lawline->{'前法版本'} = $lawline->{'此法版本'};
                     $lawline->{'此法版本'} = $params['ver'];
-                    $lawline->{'說明'} = $record['說明'];
+                    $lawline->{'說明'} = $record->{'說明'};
 					$bulk_insert_pool[] = ['lawline', implode('-', [$lawline->{'法律代碼'}, $lawline->{'法律版本代碼'}, $lawline->{'法條代碼'}]), $lawline];
 					break;
                 }

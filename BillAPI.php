@@ -170,4 +170,24 @@ class BillAPI
         $ret->data = $records;
         return $ret;
     }
+
+    public static function getLawNameFromTableName($tablename)
+    {
+        if (preg_match('#「?(.*法)(第.*條|部分).*條文修正草案(條文)?對照表#u', $tablename, $matches)) {
+            $lawname = $matches[1];
+        } elseif (preg_match('#「(.*)草案」條文對照表#', $tablename, $matches)) {
+            $lawname = $matches[1];
+        } elseif (preg_match('#(.*)(第.*條)修正草案條文對照表$#', $tablename, $matches)) {
+            $lawname = $matches[1];
+        } elseif (preg_match('#(.*)修正草案(條文)?對照表#', $tablename, $matches)) {
+            $lawname = $matches[1];
+
+        } elseif (preg_match('#(.*)增訂(.*)條文草案#', $tablename, $matches)) {
+            $lawname = $matches[1];
+        } else {
+            throw new Exception("未知的對照表標題: " . $tablename);
+        }
+        $lawname = preg_replace('#修正$#', '', $lawname);
+        return $lawname;
+    }
 }

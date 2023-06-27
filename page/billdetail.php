@@ -2,6 +2,22 @@
 $billno = Param::get('bill_id');
 $bill_data = BillAPI::getBillData($billno);
 Param::addAPI('/api/billdata?billNo=' . urlencode($billno), "議案資料");
+if ($bill_data->docData->{'對照表'}) {
+    $laws = [];
+    foreach ($bill_data->docData->{'對照表'} as $idx => $table) {
+        try {
+            $lawname = BillAPI::getLawNameFromTableName($table->{'對照表標題'});
+            $laws[] = $lawname;
+        } catch (Exception $e) {
+        }
+        $bill_data->docData->{'對照表'}[$idx]->{'法律'} = $lawname;
+    }
+    $ret = LawAPI::searchLaw(['names' => $laws]);
+    $lawname_id = [];
+    foreach ($ret->data as $law) {
+        $lawname_id[$law->{'最新名稱'}] = $law->_id;
+    }
+}
 ?>
 <?php include(__DIR__ . '/header.php'); ?>
 <h1><?= htmlspecialchars($bill_data->detail->{'議案名稱'}) ?></h1>
@@ -75,7 +91,11 @@ Param::addAPI('/api/billdata?billNo=' . urlencode($billno), "議案資料");
     <ul>
         <?php foreach ($bill_data->docData->{'對照表'} as $table) { ?>
         <li>
+        <?php if (property_exists($table, '法律') and array_key_exists($table->{'法律'}, $lawname_id)) { ?>
+        <a href="/lawdiff/<?= urlencode($lawname_id[$table->{'法律'}]) ?>/bill-<?= $bill_data->detail->billNo ?>"><?= htmlspecialchars($table->{'對照表標題'}) ?></a>
+        <?php } else { ?>
         <a href="#"><?= htmlspecialchars($table->{'對照表標題'}) ?></a>
+        <?php } ?>
         </li>
         <?php } ?>
     </ul>
