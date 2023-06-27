@@ -68,11 +68,11 @@ return;
                 foreach ($tr_dom->getElementsByTagName('a') as $a_dom) {
                     $name = preg_split("/\s+/", trim($a_dom->nodeValue));
                     $billno = explode("'", $a_dom->getAttribute('onclick'))[1];
-                    $obj->{'關連議案'}[] = array(
-                        'billNo' => $billno,
-                        '提案人' => $name[0],
-                        '議案名稱' => $name[1],
-                    );
+                    $bill = new StdClass;
+                    $bill->billNo = $billno;
+                    $bill->{'提案人'} = $name[0];
+                    $bill->{'議案名稱'} = $name[1];
+                    $obj->{'關連議案'}[] = $bill;
                 }
             } else if ('提案人' == $key or '連署人' == $key) {
                 $obj->{$key} = '';
@@ -82,27 +82,27 @@ return;
             } else if ('議案流程' == $key) {
                 $obj->{'議案流程'} = array();
                 foreach ($tr_dom->getElementsByTagName('tbody')->item(0)->getElementsByTagName('tr') as $sub_tr_dom) {
-                    $record = array();
+                    $record = new StdClass;
                     $sub_td_doms = $sub_tr_dom->getElementsByTagName('td');
-                    $record['會期'] = trim($sub_td_doms->item(0)->nodeValue);
-                    $record['日期'] = array();
+                    $record->{'會期'} = trim($sub_td_doms->item(0)->nodeValue);
+                    $record->{'日期'} = array();
                     foreach ($sub_td_doms->item(1)->getElementsByTagName('div')->item(0)->childNodes as $dom) {
                         if ($dom->nodeName == 'a') {
-                            $record['日期'][] = trim($dom->nodeValue);
+                            $record->{'日期'}[] = trim($dom->nodeValue);
                         } else if ($dom->nodeName == '#text' and trim($dom->nodeValue)) {
-                            $record['日期'][] = trim($dom->nodeValue);
+                            $record->{'日期'}[] = trim($dom->nodeValue);
                         }
                     }
-                    $record['院會/委員會'] = trim($sub_td_doms->item(2)->nodeValue);
-                    $record['狀態'] = '';
+                    $record->{'院會/委員會'} = trim($sub_td_doms->item(2)->nodeValue);
+                    $record->{'狀態'} = '';
                     foreach ($sub_td_doms->item(3)->childNodes as $n) {
                         if ($n->nodeName == '#text') {
-                            $record['狀態'] .= trim($n->nodeValue);
+                            $record->{'狀態'} .= trim($n->nodeValue);
                         } elseif ($n->nodeName == 'a') {
-                            $record['狀態'] .= trim($n->nodeValue);
+                            $record->{'狀態'} .= trim($n->nodeValue);
                         }
                     }
-                    $record['狀態'] = preg_replace('/\s+/', ' ', $record['狀態']);
+                    $record->{'狀態'} = preg_replace('/\s+/', ' ', $record->{'狀態'});
                     $obj->{'議案流程'}[] = $record;
                 }
             } else {
@@ -352,11 +352,12 @@ return;
                     } else if (count($td_doms) == 3 and trim($td_doms[0]->nodeValue) == '修正名稱') {
                         $tr_dom = array_shift($tr_doms);
                         $td_doms = $tr_dom->getElementsByTagName('td');
-                        $record2->{'名稱修正'} = array(
-                            '修正名稱' => trim($td_doms->item(0)->nodeValue),
-                            '現行名稱' => trim($td_doms->item(1)->nodeValue),
-                            '說明' => str_replace("\t", "", trim($td_doms->item(2)->nodeValue)),
-                        );
+                        $d = new StdClass;
+                        $d->{'修正名稱'} = trim($td_doms->item(0)->nodeValue);
+                        $d->{'現行名稱'} = trim($td_doms->item(1)->nodeValue);
+                        $d->{'說明'} = str_replace("\t", "", trim($td_doms->item(2)->nodeValue));
+
+                        $record2->{'名稱修正'} = $d;
 
                     } else if (count($td_doms) == 2 and in_array(trim($td_doms[0]->nodeValue), array('名稱', '法案名稱'))) {
                         $tr_dom = array_shift($tr_doms);
@@ -364,33 +365,35 @@ return;
                         $record2->{'名稱說明'} = str_replace("\t", "", trim($td_doms->item(1)->nodeValue));
                     } else if ('審查會版本' == $record2->{'立法種類'}) {
                         if (!array_key_exists('現行條文', $columns)) {
-                            $record2->{'修正記錄'}[] = array(
-                                '增訂條文' => str_replace("\t", "", trim($td_doms[$columns['審查會通過條文']]->nodeValue)),
-                                '說明' => str_replace("\t", "", trim($td_doms[$columns['說明']]->nodeValue)),
-                            );
+                            $d = new StdClass;
+                            $d->{'增訂條文'} = str_replace("\t", "", trim($td_doms[$columns['審查會通過條文']]->nodeValue));
+                            $d->{'說明'} = str_replace("\t", "", trim($td_doms[$columns['說明']]->nodeValue));
+                            $record2->{'修正記錄'}[] = $d;
                         } else {
-                            $record2->{'修正記錄'}[] = array(
-                                '修正條文' => str_replace("\t", "", trim($td_doms[$columns['審查會通過條文']]->nodeValue)),
-                                '現行條文' => str_replace("\t", "", trim($td_doms[$columns['現行條文']]->nodeValue)),
-                                '說明' => str_replace("\t", "", trim($td_doms[$columns['說明']]->nodeValue)),
-                            );
+                            $d = new StdClass;
+                            $d->{'修正條文'} = str_replace("\t", "", trim($td_doms[$columns['審查會通過條文']]->nodeValue));
+                            $d->{'現行條文'} = str_replace("\t", "", trim($td_doms[$columns['現行條文']]->nodeValue));
+                            $d->{'說明'} = str_replace("\t", "", trim($td_doms[$columns['說明']]->nodeValue));
+                            $record2->{'修正記錄'}[] = $d;
                         }
                     } else if ('修正條文' == $record2->{'立法種類'}) { // and $td_doms->length == 3) {
-                        $record2->{'修正記錄'}[] = array(
-                            '修正條文' => str_replace("\t", "", trim($all_td_doms[0]->nodeValue)),
-                            '現行條文' => str_replace("\t", "", trim($all_td_doms[1]->nodeValue)),
-                            '說明' => str_replace("\t", "", trim($all_td_doms[2]->nodeValue)),
-                        );
+                        $d = new StdClass;
+                        $d->{'修正條文'} = str_replace("\t", "", trim($all_td_doms[0]->nodeValue));
+                        $d->{'現行條文'} = str_replace("\t", "", trim($all_td_doms[1]->nodeValue));
+                        $d->{'說明'} = str_replace("\t", "", trim($all_td_doms[2]->nodeValue));
+
+                        $record2->{'修正記錄'}[] = $d;
                     } else if ('增訂條文' == $record2->{'立法種類'} and count($td_doms) == 2) {
-                        $record2->{'修正記錄'}[] = array(
-                            '增訂條文' => str_replace("\t", "", trim($td_doms[0]->nodeValue)),
-                            '說明' => str_replace("\t", "", trim($td_doms[1]->nodeValue)),
-                        );
+                        $d = new StdClass;
+                        $d->{'增訂條文'} = str_replace("\t", "", trim($td_doms[0]->nodeValue));
+                        $d->{'說明'} = str_replace("\t", "", trim($td_doms[1]->nodeValue));
+                        $record2->{'修正記錄'}[] = $d;
                     } else if ('制定條文' == $record2->{'立法種類'}) {
-                        $record2->{'修正記錄'}[] = array(
-                            '增訂條文' => str_replace("\t", "", trim($td_doms[$columns['條文']]->nodeValue)),
-                            '說明' => str_replace("\t", "", trim($td_doms[$columns['說明']]->nodeValue)),
-                        );
+                        $d = new StdClass;
+                        $d->{'增訂條文'} = str_replace("\t", "", trim($td_doms[$columns['條文']]->nodeValue));
+                        $d->{'說明'} = str_replace("\t", "", trim($td_doms[$columns['說明']]->nodeValue));
+
+                        $record2->{'修正記錄'}[] = $d;
                     } else {
                         if ($record2->{'立法種類'} == '審查會版本') {
                            // == '1070321070300100') {
