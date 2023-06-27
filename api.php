@@ -35,6 +35,8 @@ if ($method == 'stat') {
     exit;
 } elseif ($method == 'law') {
     json_output(LawAPI::searchLaw($_GET));
+} elseif ($method == 'bill') {
+    json_output(BillAPI::searchBill($_GET));
 } else if ($method == 'lawver') {
     json_output(LawAPI::searchLawVer($_GET));
 } else if ($method == 'lawline') {

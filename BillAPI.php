@@ -105,4 +105,69 @@ class BillAPI
         }
         return $proposal . '-' . $title;
     }
+
+    public static function searchBill($params)
+    {
+        $api_params = [];
+        if (array_key_exists('page', $params)) {
+            $api_params['page'] = $page = max(intval($params['page']), 1);
+        } else {
+            $page = 1;
+        }
+        if (array_key_exists('limit', $params)) {
+            $api_params['limit'] = $limit = max(intval($params['limit']), 1);
+        } else {
+            $limit = 100;
+        }
+        $cmd = [
+            'query' => [
+                'bool' => [
+                    'must' => [],
+                    'filter' => [],
+                ],
+            ],
+            'size' => $limit,
+            'from' => $limit * $page - $limit,
+            'sort' => ['last_time' => 'desc'],
+        ];
+        if ($params['bill_id']) {
+            $api_params['bill_id'] = $params['bill_id'];
+            $cmd['query'] = [
+                'term' => ['法律代碼' => $params['bill_id']],
+            ];
+        }
+        if (array_key_exists('q', $params) and $params['q']) {
+            $api_params['q'] = $params['q'];
+            $cmd['query']['bool']['should'][] = [
+                'match_phrase' => [
+                    '議案名稱' => $params['q'],
+                ]
+            ];
+            $cmd['query']['bool']['should'][] = [
+                'match_phrase' => [
+                    '提案單位/提案委員' => $params['q'],
+                ]
+            ];
+        }
+        try {
+            $obj = API::query('bill', '/bill/_search', 'GET', json_encode($cmd));
+        } catch (Exception $e) {
+            echo $e->getMessage();
+            exit;
+        }
+
+        $records = array();
+        $ret = new StdClass;
+        $ret->total = $obj->hits->total;
+        $ret->limit = $limit;
+        $ret->totalpage = ceil($ret->total / $ret->limit);
+        $ret->page = $page;
+        $ret->api_url = LawAPI::getAPIURL('/api/bill', $api_params);
+        foreach ($obj->hits->hits as $hit) {
+            $record = $hit->_source;
+            $records[] = $record;
+        }
+        $ret->data = $records;
+        return $ret;
+    }
 }

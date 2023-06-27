@@ -27,7 +27,13 @@
         <div class="form-group">
           <input type="text" class="form-control" placeholder="Search" name="q">
         </div>
-        <button type="submit" class="btn btn-default">Submit</button>
+        <button type="submit" class="btn btn-default">搜尋法律</button>
+      </form>
+      <form class="navbar-form navbar-left" role="search" action="/bill">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q">
+        </div>
+        <button type="submit" class="btn btn-default">搜尋議案</button>
       </form>
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->

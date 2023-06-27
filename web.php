@@ -54,4 +54,7 @@ if ($uri == '/' or $uri == '') {
     Param::set('lawline_id', urldecode($matches[2]));
     include(__DIR__ . '/page/lawline.php');
     exit;
+} elseif ($uri == '/bill') {
+    include(__DIR__ . '/page/bill.php');
+    exit;
 }
