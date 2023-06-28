@@ -173,7 +173,7 @@ class BillAPI
 
     public static function getLawNameFromTableName($tablename)
     {
-        if (preg_match('#「?(.*法)(第.*條|部分).*條文修正草案(條文)?對照表#u', $tablename, $matches)) {
+        if (preg_match('#「?(.*(條例|法))(第.*條|部分).*條文修正草案(條文)?對照表#u', $tablename, $matches)) {
             $lawname = $matches[1];
         } elseif (preg_match('#「(.*)草案」條文對照表#', $tablename, $matches)) {
             $lawname = $matches[1];
