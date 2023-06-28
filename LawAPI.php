@@ -169,6 +169,7 @@ class LawAPI
                     throw new Exception("找不到修正條文或增訂條文");
                 }
                 $law_content = preg_replace('#^（[^）]+）\s*#', '', $law_content);
+                $law_content = str_replace("\n\n", "\n", $law_content);
                 if ($record->{'現行條文'} == '') {
                     $rule_no = explode('　', $law_content, 2)[0];
                     $lawline = new StdClass;
