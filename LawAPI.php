@@ -197,6 +197,9 @@ class LawAPI
                     if ($check_lawline->{'日期'} > $commit_at) {
                         continue;
                     }
+                    if (strpos($check_lawline->{'法律版本代碼'}, 'bill-') === 0) {
+                        continue;
+                    }
                     if (!self::equalStr($check_lawline->{'內容'}, $content)) {
                         $miss_content[] = [$check_lawline->{'日期'}, $check_lawline->{'內容'}];
                         //continue;
