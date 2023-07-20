@@ -30,7 +30,7 @@ if ($method == 'stat') {
         ],
         'size' => 0,
     ];
-    $obj = API::query('/law/_search', 'GET', json_encode($cmd));
+    $obj = API::query('law', '/{prefix}law/_search', 'GET', json_encode($cmd));
     json_output($obj, JSON_UNESCAPED_UNICODE);
     exit;
 } elseif ($method == 'law') {

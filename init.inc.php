@@ -10,11 +10,21 @@ class API
 {
     public static function query($type, $url, $method = 'GET', $data = null) {
         if ($type == 'bill') {
-            $curl = curl_init(getenv('BILL_SEARCH_URL') . $url);
+            $url = str_replace('{prefix}', getenv('BILL_ELASTIC_PREFIX'), $url);
+            $curl = curl_init(getenv('BILL_ELASTIC_URL') . $url);
+            $_user = getenv('BILL_ELASTIC_USER');
+            $_password = getenv('BILL_ELASTIC_PASSWORD');
         } else {
-            $curl = curl_init(getenv('LAW_SEARCH_URL') . $url);
+            $url = str_replace('{prefix}', getenv('LAW_ELASTIC_PREFIX'), $url);
+            $curl = curl_init(getenv('LAW_ELASTIC_URL') . $url);
+            $_user = getenv('LAW_ELASTIC_USER');
+            $_password = getenv('LAW_ELASTIC_PASSWORD');
         }
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_USERPWD, $_user . ':' . $_password);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+        ]);
         if (!is_null($method)) {
             curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $method);
             if (!is_null($data)) {

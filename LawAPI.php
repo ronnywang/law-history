@@ -73,7 +73,7 @@ class LawAPI
             ];
         }
         try {
-            $obj = API::query('law', '/law/_search', 'GET', json_encode($cmd));
+            $obj = API::query('law', '/{prefix}law/_search', 'GET', json_encode($cmd));
         } catch (Exception $e) {
             echo $e->getMessage();
             exit;
@@ -81,7 +81,7 @@ class LawAPI
 
         $records = array();
         $ret = new StdClass;
-        $ret->total = $obj->hits->total;
+        $ret->total = $obj->hits->total->value;
         $ret->limit = $limit;
         $ret->totalpage = ceil($ret->total / $ret->limit);
         $ret->page = $page;
@@ -285,10 +285,10 @@ class LawAPI
             $api_params['type'] = $params['type'];
             $cmd['query']['bool']['must'][] = ['term' => ['版本種類' => $params['type']]];
         }
-        $obj = API::query('law', '/lawver/_search', 'GET', json_encode($cmd));
+        $obj = API::query('law', '/{prefix}lawver/_search', 'GET', json_encode($cmd));
         $records = new StdClass;
         $records->page = $page;
-        $records->total = $obj->hits->total;
+        $records->total = $obj->hits->total->value;
         $records->total_page = ceil($obj->hits->total / 100);
         $records->api_url = self::getAPIURL('/api/lawver', $api_params);
         $records->lawver = [];
@@ -428,11 +428,11 @@ class LawAPI
             ];
         }
 
-        $obj = API::query('law', '/lawline/_search', 'GET', json_encode($cmd));
+        $obj = API::query('law', '/{prefix}lawline/_search', 'GET', json_encode($cmd));
         $records = new StdClass;
         $records->query = $cmd['query'];
         $records->page = $page;
-        $records->total = $obj->hits->total;
+        $records->total = $obj->hits->total->value;
         $records->total_page = ceil($obj->hits->total / 100);
         $records->api_url = self::getAPIURL('/api/lawline', $api_params);
         $records->lawline= [];
@@ -457,7 +457,7 @@ class LawAPI
             $mappings = [$mapping];
         }
         foreach ($mappings as $mapping) {
-			$ret = API::query('law', "/{$mapping}/_bulk", 'PUT', self::$_db_bulk_pool[$mapping]);
+			$ret = API::query('law', "/{prefix}{$mapping}/_bulk", 'PUT', self::$_db_bulk_pool[$mapping]);
             $ids = [];
             foreach ($ret->items as $command) {
                 foreach ($command as $action => $result) {
@@ -471,7 +471,6 @@ class LawAPI
             }
 
             error_log(sprintf("bulk commit, update (%d) %s", count($ids), mb_strimwidth(implode(',', $ids), 0, 200)));
-            API::query('law', "/_flush", "POST", '');
             self::$_db_bulk_pool[$mapping] = '';
         }
     }

@@ -17,7 +17,7 @@ class BillAPI
             }
             $cmd['query']['ids'] = ['values' => $params['id']];
         }
-        $obj = API::query('bill', '/billidmap/_search', 'GET', json_encode($cmd));
+        $obj = API::query('bill', '/{prefix}billidmap/_search', 'GET', json_encode($cmd));
         $records = new StdClass;
         $records->api_url = LawAPI::getAPIURL('/api/billidmap', $api_params);
         $records->map = new StdClass;
@@ -150,7 +150,7 @@ class BillAPI
             ];
         }
         try {
-            $obj = API::query('bill', '/bill/_search', 'GET', json_encode($cmd));
+            $obj = API::query('bill', '/{prefix}bill/_search', 'GET', json_encode($cmd));
         } catch (Exception $e) {
             echo $e->getMessage();
             exit;
