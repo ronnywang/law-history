@@ -121,7 +121,16 @@ return;
         if ($th_dom = $doc->getElementById('t1')) {
             return self::parseOldBillDetail($billno, $doc);
         }
-        if (!$h4_dom = $doc->getElementsByTagName('h4')->item(0)) {
+        $h4_dom = $doc->getElementsByTagName('h4')->item(0);
+        if (!$h4_dom) {
+            foreach ($doc->getElementsByTagName('span') as $span_dom) {
+                if ($span_dom->getAttribute('class') == 'card-title fs-5 mb-3') {
+                    $h4_dom = $span_dom;
+                    break;
+                }
+            }
+        }
+        if (!$h4_dom) {
             throw new Exception("unknown {$billno}: h4 not found");
         }
         $obj = new StdClass;
@@ -138,12 +147,30 @@ return;
             }
         }
         if (!$dom) {
+            foreach ($h4_dom->parentNode->getElementsByTagName('span') as $span_dom) { 
+                if (strpos($span_dom->getAttribute('class'), 'text-grey mb-2') === 0) {
+                    $dom = $span_dom;
+                    $obj->{'提案單位/提案委員'} = $span_dom->nodeValue;
+                    break;
+                }
+            }
+        }
+        if (!$dom) {
             throw new Exception("unknown {$billno}: no 提案單位");
         }
         while ($dom = $dom->nextSibling) {
             if ($dom->nodeName == 'div' and $span_dom = $dom->getElementsByTagName('span')->item(0) and (strpos($span_dom->getAttribute('class'), 'fw-bolder') !== false)) {
                 $obj->{'議案狀態'} = $span_dom->nodeValue;
                 break;
+            }
+        }
+        if (!$dom) {
+            foreach ($h4_dom->parentNode->getElementsByTagName('span') as $span_dom) { 
+                if (strpos($span_dom->getAttribute('class'), 'mb-2  fw-bolder') !== false) {
+                    $dom = $span_dom;
+                    $obj->{'議案狀態'} = $span_dom->nodeValue;
+                    break;
+                }
             }
         }
         if (!$dom) {
@@ -180,8 +207,16 @@ return;
                 foreach ($dom->getElementsByTagName('dl') as $dl_dom) {
                     $p = new StdClass;
                     $p->{'日期'} = [];
+                    $dt_dom = $dl_dom->getElementsByTagName('dt')->item(0);
+                    if ($dt_dom->nodeValue == '') {
+                        continue;
+                    }
                     $p->{'狀態'} = $dl_dom->getElementsByTagName('dt')->item(0)->getElementsByTagName('h5')->item(0)->nodeValue;
-                    $text = trim($dl_dom->getElementsByTagName('dd')->item(0)->getElementsByTagName('h5')->item(0)->nodeValue);
+                    $dd_dom = $dl_dom->getElementsByTagName('dd')->item(0);
+                    $text = '';
+                    if ($dd_dom->getElementsByTagName('h5')->length) {
+                        $text = trim($dd_dom->getElementsByTagName('h5')->item(0)->nodeValue);
+                    }
                     if ($text == '') {
                         // TODO: 委員會發文？
                     } else if (preg_match('#^(.*) (\d*-.*)$#', $text, $matches)) {
